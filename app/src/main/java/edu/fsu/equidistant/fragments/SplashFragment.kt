@@ -9,12 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 
-
-/**
- * A simple [Fragment] subclass.
- * Use the [SplashFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SplashFragment : Fragment() {
 
     var listener : SplashInterface? = null
@@ -45,7 +39,7 @@ class SplashFragment : Fragment() {
         }
         else{
             throw ClassCastException(
-                context.toString() + "must impliment interface"
+                context.toString() + "must implement interface"
             )
         }
     }

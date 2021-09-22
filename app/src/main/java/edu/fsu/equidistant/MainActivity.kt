@@ -11,14 +11,15 @@ import edu.fsu.equidistant.fragments.LoginFragment
 import edu.fsu.equidistant.fragments.RegisterFragment
 import edu.fsu.equidistant.fragments.SplashFragment
 
-class MainActivity : AppCompatActivity(), SplashFragment.SplashInterface {
+class MainActivity : AppCompatActivity(), SplashFragment.SplashInterface, LoginFragment.LoginInterface,
+RegisterFragment.RegisterInterface{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         onSplash()
     }
 
-    fun onSplash():Unit{
+    private fun onSplash():Unit{
         val fragment : SplashFragment = SplashFragment()
         val tag = fragment::class.java.canonicalName
         supportFragmentManager.beginTransaction().replace(R.id.fragmentFrame,fragment,tag).commitNow()
@@ -32,6 +33,18 @@ class MainActivity : AppCompatActivity(), SplashFragment.SplashInterface {
 
     override fun onRegister() {
         val fragment: Fragment = RegisterFragment()
+        val tag = fragment::class.java.canonicalName
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentFrame,fragment,tag).commitNow()
+    }
+
+    override fun onSubmit(username: String, password: String) {
+        val fragment: Fragment = HomeFragment()
+        val tag = fragment::class.java.canonicalName
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentFrame,fragment,tag).commitNow()
+    }
+
+    override fun onSubmit(username: String, password: String, phoneNumber: String) {
+        val fragment: Fragment = HomeFragment()
         val tag = fragment::class.java.canonicalName
         supportFragmentManager.beginTransaction().replace(R.id.fragmentFrame,fragment,tag).commitNow()
     }
