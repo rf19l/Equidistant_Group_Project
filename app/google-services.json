@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "648421986302",
+    "project_id": "equidistant-e6f38",
+    "storage_bucket": "equidistant-e6f38.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:648421986302:android:176e3b9f02398037947aaf",
+        "android_client_info": {
+          "package_name": "edu.fsu.equidistant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "648421986302-2chr959f6aolgk1kqbesos84mtu9u2jg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ4VFYFWITPdSiUlLGABWYEvcFdiFP_sc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "648421986302-2chr959f6aolgk1kqbesos84mtu9u2jg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

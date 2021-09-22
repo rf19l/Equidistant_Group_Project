@@ -1,11 +1,15 @@
-package com.fsu.equidistant
+package edu.fsu.equidistant
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import edu.fsu.equidistant.R
 
 /*Fragment imports */
-import com.fsu.equidistant.fragments.*
+import edu.fsu.equidistant.fragments.*
+import edu.fsu.equidistant.fragments.LoginFragment
+import edu.fsu.equidistant.fragments.RegisterFragment
+import edu.fsu.equidistant.fragments.SplashFragment
 
 class MainActivity : AppCompatActivity(), SplashFragment.SplashInterface {
     override fun onCreate(savedInstanceState: Bundle?) {

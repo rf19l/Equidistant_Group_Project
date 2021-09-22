@@ -1,6 +1,6 @@
-package com.fsu.equidistant.fragments
+package edu.fsu.equidistant.fragments
 import android.content.Context
-import com.fsu.equidistant.R
+import edu.fsu.equidistant.R
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -17,7 +17,7 @@ import android.widget.Button
  */
 class SplashFragment : Fragment() {
 
-    var listener :SplashInterface? = null
+    var listener : SplashInterface? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }

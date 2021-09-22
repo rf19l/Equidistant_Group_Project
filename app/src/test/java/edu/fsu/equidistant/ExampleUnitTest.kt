@@ -1,4 +1,4 @@
-package com.fsu.equidistant
+package edu.fsu.equidistant
 
 import org.junit.Test
 
