@@ -58,7 +58,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/submit"
+        android:id="@+id/submit_button"
         android:text="@string/submit"
         android:layout_below="@+id/et_validate"
         android:layout_centerInParent="true"
