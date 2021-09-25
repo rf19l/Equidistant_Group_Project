@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "648421986302",
-    "project_id": "equidistant-e6f38",
-    "storage_bucket": "equidistant-e6f38.appspot.com"
+    "project_number": "81774790913",
+    "project_id": "equidistant-cf005",
+    "storage_bucket": "equidistant-cf005.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:648421986302:android:176e3b9f02398037947aaf",
+        "mobilesdk_app_id": "1:81774790913:android:5c1599f5cfa269e2deb300",
         "android_client_info": {
           "package_name": "edu.fsu.equidistant"
         }
       },
       "oauth_client": [
         {
-          "client_id": "648421986302-2chr959f6aolgk1kqbesos84mtu9u2jg.apps.googleusercontent.com",
+          "client_id": "81774790913-m3908gp9jt514u38ujo3ub8jr5i0kdg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.fsu.equidistant",
+            "certificate_hash": "6f7b1775ac9bee12f33581554927df785091e178"
+          }
+        },
+        {
+          "client_id": "81774790913-75o2b00bd5duipfh08iqvspad9cvtpba.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAQ4VFYFWITPdSiUlLGABWYEvcFdiFP_sc"
+          "current_key": "AIzaSyCUg34rWt3aVWemjKbqNaD9BHrh_I6dHa0"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "648421986302-2chr959f6aolgk1kqbesos84mtu9u2jg.apps.googleusercontent.com",
+              "client_id": "81774790913-75o2b00bd5duipfh08iqvspad9cvtpba.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

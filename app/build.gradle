@@ -5,6 +5,8 @@ plugins {
 }
 
 apply plugin: "androidx.navigation.safeargs.kotlin"
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdk 31

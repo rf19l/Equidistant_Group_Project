@@ -5,8 +5,9 @@
       <map>
         <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/activity_main.xml" value="0.5744791666666667" />
         <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_home.xml" value="0.5744791666666667" />
-        <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_login.xml" value="0.5744791666666667" />
-        <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_register.xml" value="0.5744791666666667" />
+        <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_login.xml" value="0.5" />
+        <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_login_or_register.xml" value="0.5744791666666667" />
+        <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_register.xml" value="0.5" />
         <entry key="..\:/Users/200594585/AndroidProjects/Equidistant_Group_Project/app/src/main/res/layout/fragment_splash.xml" value="0.5744791666666667" />
       </map>
     </option>
