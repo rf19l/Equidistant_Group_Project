@@ -1,6 +1,7 @@
 package edu.fsu.equidistant.fragments
 
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -14,6 +15,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         val binding = FragmentRegisterBinding.bind(view)
         binding.apply {

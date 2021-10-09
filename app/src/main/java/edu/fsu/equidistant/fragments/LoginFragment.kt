@@ -1,6 +1,7 @@
 package edu.fsu.equidistant.fragments
 
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Toast
@@ -15,6 +16,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         //TODO
         // This seems like a hacky way to navigate to home when the user is logged in.
