@@ -66,7 +66,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
-                    Toast.makeText(context, "Registration successful", Toast.LENGTH_LONG).show()
                     val action = LoginFragmentDirections
                         .actionLoginFragmentToHomeFragment(email, firebaseUser)
                     findNavController().navigate(action)

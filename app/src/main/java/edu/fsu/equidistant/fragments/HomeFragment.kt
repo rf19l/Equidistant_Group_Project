@@ -16,11 +16,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
 
+    private var binding: FragmentHomeBinding? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        val binding = FragmentHomeBinding.bind(view)
-        binding.apply {
+        binding = FragmentHomeBinding.bind(view)
+        binding!!.apply {
             textViewEmail.text = args.email
             textViewUserid.text = args.userId
         }
@@ -33,11 +35,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val action = HomeFragmentDirections.actionHomeFragmentToLoginFragment()
             findNavController().navigate(action)
         } else if (id == R.id.option_editProfile) {
-            val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment()
+            val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment(args.userId)
             findNavController().navigate(action)
         }
         return super.onOptionsItemSelected(item)
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
     }
 }
 
