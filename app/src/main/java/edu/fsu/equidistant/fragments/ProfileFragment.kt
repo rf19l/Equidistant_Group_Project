@@ -17,6 +17,8 @@ import androidx.navigation.fragment.navArgs
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.R
@@ -34,6 +36,7 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
     private var binding: FragmentProfileBinding? = null
     private var user: FirebaseUser? = null
     private var imageUri: Uri? = null
+    private val db = Firebase.firestore
 
 
 
@@ -97,6 +100,12 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
                     .addOnCompleteListener { task->
                         if (task.isSuccessful){
                             Toast.makeText(context,"Profile Update Successful",Toast.LENGTH_LONG).show()
+                            val data = hashMapOf(
+                                "name" to user?.email,
+                                "avatar" to storageRef.child(user?.photoUrl.toString()).path
+                            )
+
+                            user?.email?.let { it1 -> db.collection("users").document(it1).set(data, SetOptions.merge()) }
                         }
                         else{
                             Toast.makeText(context,"Failed to update profile",Toast.LENGTH_LONG).show()
