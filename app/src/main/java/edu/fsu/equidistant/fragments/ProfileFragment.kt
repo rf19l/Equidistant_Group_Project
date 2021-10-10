@@ -1,8 +1,13 @@
 package edu.fsu.equidistant.fragments
 
+import android.app.Activity
 import android.content.Intent
+import android.content.Intent.ACTION_PICK
 import android.os.Bundle
 import android.view.*
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -15,16 +20,21 @@ import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentProfileBinding
 
 class ProfileFragment : Fragment(R.layout.fragment_home) {
+
+
     private val storage = Firebase.storage
     private val args: ProfileFragmentArgs by navArgs()
     private var binding: FragmentProfileBinding? = null
     private var user: FirebaseUser? = null
 
     override fun onCreateView(
+
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
+
     ): View? {
+
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         val view = binding!!.root
         return view
@@ -35,9 +45,15 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
         user = FirebaseAuth.getInstance().currentUser
+        val loadImage=registerForActivityResult(
+            GetContent(),
+            ActivityResultCallback {
+                binding?.imageViewProfilePhoto?.setImageURI(it)
+            })
         binding!!.apply{
             imageViewProfilePhoto.setOnClickListener {
-                choosePicture()
+                loadImage.launch("image/*")
+
             }
 
         }
@@ -47,10 +63,9 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun choosePicture(){
-        val intent : Intent = Intent()
-        intent.setType("image/*")
-        intent.setAction(Intent.ACTION_GET_CONTENT)
+
         //TODO Get images from gallery
+
     }
 
     /*
