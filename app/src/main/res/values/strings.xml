@@ -13,4 +13,7 @@
     <string name="confirm_password">Confirm password</string>
     <string name="email">Email</string>
     <string name="logout">Logout</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="quit">Quit</string>
+    <string name="description_profile_picture">Profile Picture</string>
 </resources>
