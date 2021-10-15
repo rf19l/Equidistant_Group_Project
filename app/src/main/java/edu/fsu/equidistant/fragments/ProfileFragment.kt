@@ -142,6 +142,23 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
                 loadImage.launch("image/*")
             }
 
+            ibBackArrow.setOnClickListener {
+                val action = ProfileFragmentDirections.actionProfileFragmentToHomeFragment(
+                    user?.email!!,
+                    user!!.uid
+                )
+                findNavController().navigate(action)
+            }
+            btUpdate.setOnClickListener {
+                val action = ProfileFragmentDirections.actionProfileFragmentToHomeFragment(
+                    user?.email!!,
+                    user!!.uid
+                )
+                findNavController().navigate(action)
+
+            }
+
+
         }
 
 
