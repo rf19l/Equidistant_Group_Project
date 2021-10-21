@@ -32,8 +32,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val id = item.itemId
         if (id == R.id.option_logout) {
             FirebaseAuth.getInstance().signOut()
+
             val action = HomeFragmentDirections.actionHomeFragmentToLoginFragment()
             findNavController().navigate(action)
+
+
         } else if (id == R.id.option_editProfile) {
             val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment(args.userId)
             findNavController().navigate(action)
