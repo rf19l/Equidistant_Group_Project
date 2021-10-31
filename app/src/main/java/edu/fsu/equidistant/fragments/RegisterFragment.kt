@@ -1,19 +1,27 @@
 package edu.fsu.equidistant.fragments
 
+import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.UserProfileChangeRequest
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentRegisterBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         val binding = FragmentRegisterBinding.bind(view)
         binding.apply {
@@ -64,6 +72,28 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                     Toast.makeText(context, "Registration successful", Toast.LENGTH_LONG).show()
                     val action = RegisterFragmentDirections
                         .actionRegisterFragmentToHomeFragment(email, firebaseUser.uid)
+
+                    //TODO add default profile image to user upon profile creation
+                    /*val username = R.id.et_username.toString()
+                    val photoURI = Uri.parse("android.resource://edu.fsu.equidistant/${R.drawable.common_full_open_on_phone}")
+                    val profileUpdates = UserProfileChangeRequest.Builder()
+                        .setDisplayName(username)
+                        .setPhotoUri(photoURI)
+                        .build()
+                    CoroutineScope(Dispatchers.IO).launch{
+                        try {
+                            firebaseUser.updateProfile(profileUpdates)
+                        }
+                        catch(e : Exception){
+                           withContext(kotlinx.coroutines.Dispatchers.Main){
+                               Toast.makeText(context,e.message,Toast.LENGTH_LONG).show()
+                           }
+                        }
+                    }
+
+                     */
+
+
                     findNavController().navigate(action)
                 } else {
                     Toast.makeText(
