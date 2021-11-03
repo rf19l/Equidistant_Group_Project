@@ -16,4 +16,6 @@
     <string name="edit_profile">Edit Profile</string>
     <string name="quit">Quit</string>
     <string name="description_profile_picture">Profile Picture</string>
+    <string name="home">Home</string>
+    <string name="group_id">Group ID</string>
 </resources>

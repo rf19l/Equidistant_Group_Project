@@ -7,9 +7,9 @@
 
     <TextView
         android:id="@+id/text_view_email"
-        android:layout_centerInParent="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         tools:text="Email" />
 
     <TextView
@@ -19,5 +19,25 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/text_view_email"
         tools:text="UserID" />
+
+    <Button
+        android:id="@+id/button_create_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_userid"
+        android:layout_centerInParent="true"
+        tools:text="Create Group" />
+
+    <Button
+        android:id="@+id/button_join_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_create_group"
+        android:layout_centerInParent="true"
+        tools:text="Join Group" />
+
+
+
+
 
 </RelativeLayout>

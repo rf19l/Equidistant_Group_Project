@@ -1,43 +1,38 @@
 package edu.fsu.equidistant.fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import edu.fsu.equidistant.R
-import edu.fsu.equidistant.databinding.FragmentHomeBinding
+import edu.fsu.equidistant.databinding.FragmentJoingroupBinding
 
-class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private val args: HomeFragmentArgs by navArgs()
+class JoinGroupFragment : Fragment(R.layout.fragment_joingroup){
 
-    private var binding: FragmentHomeBinding? = null
+    private val args: JoinGroupFragmentArgs by navArgs()
+
+    private var user: FirebaseUser? = null
+    private var binding: FragmentJoingroupBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        binding = FragmentHomeBinding.bind(view)
+        binding = FragmentJoingroupBinding.bind(view)
         binding!!.apply {
-            textViewEmail.text = args.email
-            textViewUserid.text = args.userId
-            buttonCreateGroup.text = "Create Group"
-            buttonJoinGroup.text = "Join Group"
-            buttonCreateGroup.setOnClickListener {
-                val action = HomeFragmentDirections.actionHomeFragmentToCreateGroupFragment(args.userId,args.email)
-                findNavController().navigate(action)
-            }
-            buttonJoinGroup.setOnClickListener {
-                val action = HomeFragmentDirections.actionHomeFragmentToJoinGroupFragment(args.userId,args.email)
+
+            btnHome.setOnClickListener {
+                val action = JoinGroupFragmentDirections.actionJoinGroupFragmentToHomeFragment(args.userId,args.email)
                 findNavController().navigate(action)
             }
         }
-
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
@@ -52,13 +47,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment(args.userId)
             findNavController().navigate(action)
         }
+        else if (id == R.id.option_home) {
+            //val action = CreateGroupFragment.actioncreateGroupFragmentToHomeFragment(args.userId)
+            val action = JoinGroupFragmentDirections.actionJoinGroupFragmentToHomeFragment(args.userId,args.email)
+            findNavController().navigate(action)
+        }
         return super.onOptionsItemSelected(item)
 
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
-    }
 }
-

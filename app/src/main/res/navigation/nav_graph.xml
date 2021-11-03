@@ -55,6 +55,12 @@
             app:destination="@id/profileFragment"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_enter_anim" />
+        <action
+            android:id="@+id/action_homeFragment_to_createGroupFragment"
+            app:destination="@id/createGroupFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_joinGroupFragment"
+            app:destination="@id/joinGroupFragment" />
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
@@ -74,5 +80,44 @@
             app:exitAnim="@anim/nav_default_exit_anim"
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/createGroupFragment"
+        android:name="edu.fsu.equidistant.fragments.CreateGroupFragment"
+        android:label="CreateGroupFragment" >
+        <action
+            android:id="@+id/action_createGroupFragment_to_homeFragment"
+            app:destination="@id/homeFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
+        <argument
+            android:name="email"
+            app:argType="string" >
+        </argument>
+
+        <argument
+            android:name="userId" >
+        </argument>
+    </fragment>
+
+    <fragment
+        android:id="@+id/joinGroupFragment"
+        android:name="edu.fsu.equidistant.fragments.JoinGroupFragment"
+        android:label="fragment_joingroup"
+        tools:layout="@layout/fragment_joingroup" >
+        <action
+            android:id="@+id/action_joinGroupFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <argument
+            android:name="email"
+            app:argType="string" >
+        </argument>
+
+        <argument
+            android:name="userId" >
+        </argument>
     </fragment>
 </navigation>
