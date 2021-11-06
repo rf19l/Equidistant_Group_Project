@@ -16,7 +16,7 @@ import edu.fsu.equidistant.databinding.FragmentRegisterBinding
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
 
-    val database: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

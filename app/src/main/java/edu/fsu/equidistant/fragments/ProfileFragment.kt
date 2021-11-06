@@ -4,9 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
-import android.nfc.Tag
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
@@ -24,8 +22,6 @@ import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentProfileBinding
 import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.net.URL
 
 class ProfileFragment : Fragment(R.layout.fragment_home) {
 
