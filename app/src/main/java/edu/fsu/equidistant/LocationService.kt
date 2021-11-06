@@ -13,6 +13,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import java.lang.Math.abs
 import java.util.concurrent.TimeUnit
 
 
@@ -22,8 +29,10 @@ class LocationService : Service() {
     private var serviceRunningInForground = false
     private val localBinder = LocalBinder()
     private lateinit var notificationManager: NotificationManager
+    private val db = Firebase.firestore
+    private lateinit var user: FirebaseUser
 
-    // TODO: Step 1.1, Review variables (no changes).
+
     // FusedLocationProviderClient - Main class for receiving location updates.
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
@@ -34,9 +43,6 @@ class LocationService : Service() {
     // LocationCallback - Called when FusedLocationProviderClient has a new Location.
     private lateinit var locationCallback: LocationCallback
 
-    // Used only for local storage of the last known location. Usually, this would be saved to your
-    // database, but because this is a simplified sample without a full database, we only need the
-    // last location to create a Notification if the user navigates away from the app.
     private var currentLocation: Location? = null
 
     override fun onCreate() {
@@ -58,9 +64,22 @@ class LocationService : Service() {
         locationCallback = object: LocationCallback(){
             override fun onLocationResult(locationResult: LocationResult){
                 super.onLocationResult(locationResult)
-                currentLocation=locationResult.lastLocation
-                //TODO save this to Firestore
-
+                if (currentLocation == null) {
+                    currentLocation = locationResult.lastLocation
+                    val geopoint = onLocationChanged(currentLocation!!)
+                    val userRef = db.collection("users").document(user.email!!)
+                    val data = hashMapOf("location" to geopoint)
+                    userRef.set(data, SetOptions.merge())
+                }
+                else if (signifigantChange(locationResult.lastLocation)) {
+                    currentLocation = locationResult.lastLocation
+                    val geopoint = onLocationChanged(currentLocation!!)
+                    val userRef = db.collection("users").document(user.email!!)
+                    val data = hashMapOf("location" to geopoint)
+                    userRef.set(data, SetOptions.merge())
+                    Log.d("LOCATIONCALLBACK","Wrote new geopoint to firestore")
+                }
+                else Log.d("LOCATIONCALLBACK","Change not signifigant, did not write to firestore")
                 val intent = Intent(ACTION_LOCATION_SERVICE_BROADCAST)
                 intent.putExtra(EXTRA_LOCATION,currentLocation)
                 LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
@@ -72,11 +91,18 @@ class LocationService : Service() {
                     )
                 }
             }
+
+            override fun onLocationAvailability(p0: LocationAvailability) {
+                super.onLocationAvailability(p0)
+                Log.d("onLocationAvailability","LOCATION AVAILABLE")
+
+            }
         }
     }
 
     override fun onStartCommand(intent: Intent,flags:Int,startId:Int):Int{
         Log.d(TAG,"onStartCommand")
+        user = FirebaseAuth.getInstance().currentUser!!
 
         val cancelLocationTrackingFromNotification = intent.getBooleanExtra(
             EXTRA_CANCEL_LOCATION_TRAKING_FROM_NOTIFICATION,false)
@@ -88,7 +114,6 @@ class LocationService : Service() {
         //tell system not to recreate service after killed
         return START_NOT_STICKY
     }
-
 
     val CHANNEL_ID = "LOCATION_SERVICE_CHANNEL"
 
@@ -226,6 +251,18 @@ class LocationService : Service() {
             "$PACKAGE_NAME.extra.CANCEL_LOCATION_TRACKING_FROM_NOTIFICATION"
         private const val NOTIFICATION_ID = 13572468
         private const val NOTIFICATION_CHANNEL_ID ="Location Service Channel"
+    }
+
+    private fun onLocationChanged(location: Location):GeoPoint {
+        val point = GeoPoint(location.latitude, location.longitude)
+        return point
+    }
+
+    private fun signifigantChange(location:Location):Boolean{
+        val d_lat = abs(currentLocation!!.latitude - location.latitude)
+        val d_long = abs(currentLocation!!.longitude - location.longitude)
+
+        return d_lat >= .05 || d_long >=.05
     }
 
 }
