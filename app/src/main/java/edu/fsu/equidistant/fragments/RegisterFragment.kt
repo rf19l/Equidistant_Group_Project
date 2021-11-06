@@ -1,23 +1,22 @@
 package edu.fsu.equidistant.fragments
 
-import android.net.Uri
+import android.content.ContentValues
 import android.os.Bundle
-import android.view.MenuItem
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentRegisterBinding
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
+
+    val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,13 +31,12 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 val email = etEmail.text.toString().trim { it <= ' ' }
 
                 if (validate(username, password, confirmPassword, email)) {
-                    registerUser(email, password)
+                    registerUser(email, password, username)
                 }
+
             }
 
             textViewLogin.setOnClickListener {
-//                val action = RegisterFragmentDirections.actionRegisterFragmentToLoginFragment()
-//                findNavController().navigate(action)
                 findNavController().popBackStack()
             }
 
@@ -64,7 +62,7 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         return true
     }
 
-    private fun registerUser(email: String, password: String) {
+    private fun registerUser(email: String, password: String, username: String) {
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -73,27 +71,9 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                     val action = RegisterFragmentDirections
                         .actionRegisterFragmentToHomeFragment(email, firebaseUser.uid)
 
-                    //TODO add default profile image to user upon profile creation
-                    /*val username = R.id.et_username.toString()
-                    val photoURI = Uri.parse("android.resource://edu.fsu.equidistant/${R.drawable.common_full_open_on_phone}")
-                    val profileUpdates = UserProfileChangeRequest.Builder()
-                        .setDisplayName(username)
-                        .setPhotoUri(photoURI)
-                        .build()
-                    CoroutineScope(Dispatchers.IO).launch{
-                        try {
-                            firebaseUser.updateProfile(profileUpdates)
-                        }
-                        catch(e : Exception){
-                           withContext(kotlinx.coroutines.Dispatchers.Main){
-                               Toast.makeText(context,e.message,Toast.LENGTH_LONG).show()
-                           }
-                        }
-                    }
-
-                     */
-
-
+                    // add the user to the users collection using their firebase.uid
+                    addToFirestore(username, email, firebaseUser.uid)
+                    retrieveAndStoreToken()
                     findNavController().navigate(action)
                 } else {
                     Toast.makeText(
@@ -103,6 +83,39 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                     ).show()
                 }
             }
+    }
+
+    private fun addToFirestore(
+        username: String,
+        email: String,
+        uid: String
+    ) {
+        val data = hashMapOf(
+            "email" to email,
+            "username" to username,
+            "token" to null
+        )
+
+        database.collection("users").document(uid).set(data)
+    }
+
+    private fun retrieveAndStoreToken() {
+        val uid = FirebaseAuth.getInstance().currentUser!!.uid
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token: String? = task.result
+
+                    val tokenReference = database.collection("users").document(uid)
+                    tokenReference
+                        .update("token", token)
+                        .addOnSuccessListener { Log.d(ContentValues.TAG, "DocumentSnapshot successfully updated!") }
+                        .addOnFailureListener { e -> Log.w(ContentValues.TAG, "Error updating document", e) }
+                }
+            }
+
+
     }
 
 }

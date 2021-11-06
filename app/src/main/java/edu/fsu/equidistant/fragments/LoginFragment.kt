@@ -1,34 +1,46 @@
 package edu.fsu.equidistant.fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
-import android.view.MenuItem
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentLoginBinding
 
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+    val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-        //TODO
-        // This seems like a hacky way to navigate to home when the user is logged in.
-        // Will try to refactor to prevent ever navigating to login fragment when user logged in if this slows app startup
-        if (FirebaseAuth.getInstance().currentUser != null){
+    override fun onStart() {
+        super.onStart()
+
+        if (FirebaseAuth.getInstance().currentUser != null) {
             val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
             val email = FirebaseAuth.getInstance().currentUser!!.email
-            val action = email?.let { LoginFragmentDirections.actionLoginFragmentToHomeFragment(it,firebaseUser) }
+            val action = email?.let {
+                LoginFragmentDirections.actionLoginFragmentToHomeFragment(
+                    it,
+                    firebaseUser
+                )
+            }
+
             if (action != null) {
+                retrieveAndStoreToken()
                 findNavController().navigate(action)
             }
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
 
         val binding = FragmentLoginBinding.bind(view)
         binding.apply {
@@ -68,6 +80,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
                     val action = LoginFragmentDirections
                         .actionLoginFragmentToHomeFragment(email, firebaseUser)
+
+                    retrieveAndStoreToken()
                     findNavController().navigate(action)
                 } else {
                     Toast.makeText(
@@ -79,5 +93,23 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             }
     }
 
+    private fun retrieveAndStoreToken() {
+        val uid = FirebaseAuth.getInstance().currentUser!!.uid
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token: String? = task.result
+
+                    val userRef = database.collection("users").document(uid)
+                    userRef
+                        .update("token", token)
+                        .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated!") }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
+                }
+            }
+
+
+    }
 
 }
