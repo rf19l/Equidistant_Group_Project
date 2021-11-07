@@ -1,5 +1,6 @@
 package edu.fsu.equidistant.data
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +31,8 @@ class UsersAdapter(private val usersList: MutableList<User>)
             init {
                 binding.apply{
                     buttonInvite.setOnClickListener {
-
+                        val user = usersList[absoluteAdapterPosition]
+                        Log.d("User: ", user.toString())
                     }
                 }
             }
