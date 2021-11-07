@@ -1,6 +1,8 @@
 package edu.fsu.equidistant.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -8,10 +10,12 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.firestore.*
 import edu.fsu.equidistant.R
+import edu.fsu.equidistant.data.User
+import edu.fsu.equidistant.data.UsersAdapter
 import edu.fsu.equidistant.databinding.FragmentHomeBinding
 import kotlin.system.exitProcess
 
@@ -19,16 +23,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
-    private var binding: FragmentHomeBinding? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        binding = FragmentHomeBinding.bind(view)
-        binding!!.apply {
-            textViewEmail.text = args.email
-            textViewUserid.text = args.userId
+
+        val usersList: MutableList<User> = mutableListOf()
+        val usersAdapter = UsersAdapter(usersList)
+        val binding = FragmentHomeBinding.bind(view)
+
+        binding.apply {
+            recyclerViewUserList.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                setHasFixedSize(false)
+            }
         }
+
+        getUsersList(usersAdapter, binding, usersList)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -61,6 +72,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         database.collection("users")
             .document(userId)
             .update("token", "")
+    }
+
+    private fun getUsersList(
+        usersAdapter: UsersAdapter,
+        binding: FragmentHomeBinding,
+        usersList: MutableList<User>
+    ) {
+        database.collection("users")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val data = document.data
+                    val user = User(
+                        data["username"].toString(),
+                        data["email"].toString(),
+                        data["token"].toString()
+                    )
+
+                    usersList.add(user)
+                }
+
+                binding.recyclerViewUserList.adapter = usersAdapter
+            }
+
     }
 }
 
