@@ -1,6 +1,8 @@
 package edu.fsu.equidistant.fragments
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -17,6 +19,9 @@ import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
 import edu.fsu.equidistant.databinding.FragmentHomeBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -42,7 +47,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-        getUsersList(usersAdapter, binding, usersList)
+        CoroutineScope(Dispatchers.IO).launch {
+            getUsersList(usersAdapter, binding, usersList)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -82,10 +89,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding: FragmentHomeBinding,
         usersList: MutableList<User>
     ) {
+
         database.collection("users")
-            .get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
+            .addSnapshotListener { documents, error ->
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error)
+                    return@addSnapshotListener
+                }
+
+                // TODO(): Perhaps use ListAdapter DiffUtil insteal of clear() or FirestoreRecyclerView (auto updates)
+                usersList.clear()
+
+                for (document in documents!!) {
                     val data = document.data
                     val user = User(
                         data["username"].toString(),
@@ -98,7 +113,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
                 binding.recyclerViewUserList.adapter = usersAdapter
             }
-
     }
 }
 
