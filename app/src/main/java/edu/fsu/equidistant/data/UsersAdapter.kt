@@ -1,10 +1,21 @@
 package edu.fsu.equidistant.data
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import edu.fsu.equidistant.databinding.UserListItemBinding
+import edu.fsu.equidistant.notifications.NotificationData
+import edu.fsu.equidistant.notifications.PushNotification
+import edu.fsu.equidistant.notifications.RetrofitInstance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.lang.Exception
+
+const val TOPIC = "/topics/myTopic"
 
 class UsersAdapter(private val usersList: MutableList<User>)
     : RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
@@ -14,7 +25,6 @@ class UsersAdapter(private val usersList: MutableList<User>)
             .inflate(LayoutInflater.from(parent.context), parent, false)
         return UserViewHolder(binding)
     }
-
 
 
     override fun onBindViewHolder(holder: UsersAdapter.UserViewHolder, position: Int) {
@@ -32,7 +42,15 @@ class UsersAdapter(private val usersList: MutableList<User>)
                 binding.apply{
                     buttonInvite.setOnClickListener {
                         val user = usersList[absoluteAdapterPosition]
-                        Log.d("User: ", user.toString())
+                        val message = "You've got a meeting invite! Touch me!"
+                        val title = "Invitation to Meet in the Middle"
+                        PushNotification(
+                            NotificationData(title, message),
+                            user.token
+                        ).also {
+                            sendNotification(it)
+                        }
+
                     }
                 }
             }
@@ -45,4 +63,19 @@ class UsersAdapter(private val usersList: MutableList<User>)
 
         }
     }
+
+    private fun sendNotification(notification: PushNotification) =
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitInstance.api.postNotification(notification)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "Response: ${Gson().toJson(response)}")
+                } else {
+                    Log.e(TAG, response.errorBody().toString())
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, e.toString())
+            }
+        }
 }

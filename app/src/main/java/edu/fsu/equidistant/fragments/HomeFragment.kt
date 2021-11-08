@@ -11,6 +11,8 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.FirebaseMessagingService
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
@@ -20,11 +22,14 @@ import kotlin.system.exitProcess
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
+    private val TOPIC = "/topics/myTopic"
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+
+        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
 
         val usersList: MutableList<User> = mutableListOf()
         val usersAdapter = UsersAdapter(usersList)
