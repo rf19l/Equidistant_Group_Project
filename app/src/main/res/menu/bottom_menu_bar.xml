@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/option_home"
+        android:id="@+id/homeFragment"
         android:icon="@drawable/ic_home"
         android:title="Home" />
     <item
-        android:id="@+id/option_meeting"
+        android:id="@+id/meetingFragment"
         android:icon="@drawable/ic_meeting_tab"
         android:title="Meeting" />
     <item
-        android:id="@+id/option_navigation"
+        android:id="@+id/navigationFragment"
         android:icon="@drawable/ic_map"
         android:title="Map" />
 

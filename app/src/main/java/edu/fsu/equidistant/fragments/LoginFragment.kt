@@ -16,7 +16,7 @@ import edu.fsu.equidistant.databinding.FragmentLoginBinding
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
 
-    val database: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onStart() {
         super.onStart()
@@ -35,6 +35,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 retrieveAndStoreToken()
                 findNavController().navigate(action)
             }
+
         }
     }
 
