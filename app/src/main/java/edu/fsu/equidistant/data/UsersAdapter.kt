@@ -1,9 +1,12 @@
 package edu.fsu.equidistant.data
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Filter
+import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import edu.fsu.equidistant.databinding.UserListItemBinding
@@ -13,19 +16,17 @@ import edu.fsu.equidistant.notifications.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 
-const val TOPIC = "/topics/myTopic"
+class UsersAdapter(private var usersList: MutableList<User>) :
+    RecyclerView.Adapter<UsersAdapter.UserViewHolder>(), Filterable {
 
-class UsersAdapter(private val usersList: MutableList<User>)
-    : RecyclerView.Adapter<UsersAdapter.UserViewHolder>() {
+    private lateinit var usersListFull: MutableList<User>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsersAdapter.UserViewHolder {
         val binding = UserListItemBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
         return UserViewHolder(binding)
     }
-
 
     override fun onBindViewHolder(holder: UsersAdapter.UserViewHolder, position: Int) {
         val currentItem = usersList[position]
@@ -39,6 +40,8 @@ class UsersAdapter(private val usersList: MutableList<User>)
     inner class UserViewHolder(private val binding: UserListItemBinding)
         : RecyclerView.ViewHolder(binding.root) {
             init {
+                usersListFull = usersList.toMutableList()
+
                 binding.apply{
                     buttonInvite.setOnClickListener {
                         val user = usersList[absoluteAdapterPosition]
@@ -78,4 +81,41 @@ class UsersAdapter(private val usersList: MutableList<User>)
                 Log.e(TAG, e.toString())
             }
         }
+
+    override fun getFilter(): Filter {
+        return object : Filter() {
+            override fun performFiltering(constraint: CharSequence?): FilterResults {
+                val filteredList = mutableListOf<User>()
+
+                if (constraint == null || constraint.isEmpty()) {
+                    filteredList.addAll(usersListFull)
+                } else {
+                    val filteredString = constraint.toString().lowercase().trim()
+
+                    for (user in usersListFull) {
+                        if (user.email.lowercase().contains(filteredString) ||
+                            user.username.lowercase().contains(filteredString)
+                        ) {
+
+                            filteredList.add(user)
+                        }
+                    }
+                }
+
+                val filterResults = FilterResults()
+                filterResults.values = filteredList
+                return filterResults
+            }
+
+            @SuppressLint("NotifyDataSetChanged")
+            override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
+                usersList.clear()
+                usersList.addAll(results?.values as List<User>)
+                notifyDataSetChanged()
+            }
+
+        }
+    }
+
+
 }
