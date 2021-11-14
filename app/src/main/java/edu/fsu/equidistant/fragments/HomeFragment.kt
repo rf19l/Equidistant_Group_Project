@@ -7,14 +7,13 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.FirebaseMessagingService
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
@@ -27,17 +26,15 @@ import kotlin.system.exitProcess
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
-    private val TOPIC = "/topics/myTopic"
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private lateinit var usersAdapter: UsersAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
 
-        FirebaseMessaging.getInstance().subscribeToTopic(TOPIC)
-
         val usersList: MutableList<User> = mutableListOf()
-        val usersAdapter = UsersAdapter(usersList)
+        usersAdapter = UsersAdapter(usersList)
         val binding = FragmentHomeBinding.bind(view)
 
         binding.apply {
@@ -69,6 +66,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             R.id.option_quit -> {
                 exitProcess(0)
             }
+            R.id.action_search -> {
+                search(item)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -97,7 +98,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     return@addSnapshotListener
                 }
 
-                // TODO(): Perhaps use ListAdapter DiffUtil insteal of clear() or FirestoreRecyclerView (auto updates)
+                // TODO(): Perhaps use ListAdapter DiffUtil instead of clear() or FirestoreRecyclerView (auto updates)
                 usersList.clear()
 
                 for (document in documents!!) {
@@ -114,5 +115,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 binding.recyclerViewUserList.adapter = usersAdapter
             }
     }
+
+    private fun search(item: MenuItem) {
+        val searchView: SearchView = item.actionView as SearchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                usersAdapter.filter.filter(newText)
+                return false
+            }
+        })
+    }
+
 }
 
