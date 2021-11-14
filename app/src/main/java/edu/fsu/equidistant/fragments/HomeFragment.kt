@@ -9,12 +9,15 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
+import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
 import edu.fsu.equidistant.databinding.FragmentHomeBinding
@@ -27,9 +30,9 @@ import kotlin.system.exitProcess
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
+    private val viewModel: SharedViewModel by viewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
-    private val meetingID: UUID = UUID.randomUUID()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,7 +40,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         createDocument()
 
         val usersList: MutableList<User> = mutableListOf()
-        usersAdapter = UsersAdapter(usersList, meetingID)
+        usersAdapter = UsersAdapter(usersList, viewModel.meetingID)
         val binding = FragmentHomeBinding.bind(view)
 
         binding.apply {
@@ -135,7 +138,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun createDocument() {
         database.collection("meetings")
-            .document(meetingID.toString())
+            .document(viewModel.meetingID.toString())
             .set({})
     }
 }

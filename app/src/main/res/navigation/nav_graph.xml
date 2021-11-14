@@ -37,7 +37,7 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="edu.fsu.equidistant.fragments.HomeFragment"
-        android:label="fragment_home"
+        android:label="Home"
         tools:layout="@layout/fragment_home" >
         <argument
             android:name="email"
@@ -75,4 +75,9 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
     </fragment>
+    <fragment
+        android:id="@+id/meetingFragment"
+        android:name="edu.fsu.equidistant.fragments.MeetingFragment"
+        android:label="Meeting"
+        tools:layout="@layout/fragment_meeting" />
 </navigation>
