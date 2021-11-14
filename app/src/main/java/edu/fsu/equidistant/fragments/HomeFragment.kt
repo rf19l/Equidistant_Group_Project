@@ -21,6 +21,7 @@ import edu.fsu.equidistant.databinding.FragmentHomeBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.system.exitProcess
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -28,13 +29,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val args: HomeFragmentArgs by navArgs()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
+    private val meetingID: UUID = UUID.randomUUID()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+        createDocument()
 
         val usersList: MutableList<User> = mutableListOf()
-        usersAdapter = UsersAdapter(usersList)
+        usersAdapter = UsersAdapter(usersList, meetingID)
         val binding = FragmentHomeBinding.bind(view)
 
         binding.apply {
@@ -120,7 +123,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val searchView: SearchView = item.actionView as SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-
                 return false
             }
 
@@ -131,5 +133,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
     }
 
+    private fun createDocument() {
+        database.collection("meetings")
+            .document(meetingID.toString())
+            .set({})
+    }
 }
 

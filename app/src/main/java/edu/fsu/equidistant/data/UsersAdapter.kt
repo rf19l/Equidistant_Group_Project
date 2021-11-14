@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import edu.fsu.equidistant.databinding.UserListItemBinding
 import edu.fsu.equidistant.notifications.NotificationData
@@ -16,11 +18,16 @@ import edu.fsu.equidistant.notifications.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
-class UsersAdapter(private var usersList: MutableList<User>) :
+class UsersAdapter(
+    private var usersList: MutableList<User>,
+    private val meetingID: UUID = UUID.randomUUID()
+) :
     RecyclerView.Adapter<UsersAdapter.UserViewHolder>(), Filterable {
 
     private lateinit var usersListFull: MutableList<User>
+    private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UsersAdapter.UserViewHolder {
         val binding = UserListItemBinding
@@ -54,6 +61,7 @@ class UsersAdapter(private var usersList: MutableList<User>) :
                             sendNotification(it)
                         }
 
+                        addUserToMeeting(user)
                     }
                 }
             }
@@ -113,9 +121,11 @@ class UsersAdapter(private var usersList: MutableList<User>) :
                 usersList.addAll(results?.values as List<User>)
                 notifyDataSetChanged()
             }
-
         }
     }
 
-
+    private fun addUserToMeeting(user: User) {
+        val meetingRef = database.collection("meetings").document(meetingID.toString())
+        meetingRef.update("users", FieldValue.arrayUnion(user))
+    }
 }
