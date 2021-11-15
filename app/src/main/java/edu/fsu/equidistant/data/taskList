@@ -1,0 +1,13 @@
+TODO:
+1. Correct backstack for BottomNavigation. Each Fragment should be "top level." Back shouldn't
+return to previous fragments.
+
+2. Send "meetingID" through notification data.
+
+3. Get Location data every ~10 minutes. Notification should also update user's Location.
+
+4. Persistent meetingID unless "Disband" is used.
+
+5. // TODO: May revert BottomNavigationView here (MainActivity) in favor of a regular buttonClick to navigate.
+
+6.
