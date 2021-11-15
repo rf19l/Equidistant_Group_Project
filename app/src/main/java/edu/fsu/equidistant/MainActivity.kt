@@ -7,6 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import edu.fsu.equidistant.databinding.ActivityMainBinding
@@ -17,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
 
-    // TODO: May revert BottomNavigationView here in favor of a regular buttonClick to navigate.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -28,13 +28,14 @@ class MainActivity : AppCompatActivity() {
                 as NavHostFragment
 
         navController = navHostFragment.findNavController()
+        setSupportActionBar(binding.toolBar)
 
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.homeFragment, R.id.meetingFragment
-            ))
+            )
+        )
 
-        setSupportActionBar(binding.toolBar)
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.apply {
@@ -50,7 +51,10 @@ class MainActivity : AppCompatActivity() {
 
             bottomNavigation.setupWithNavController(navController)
         }
+    }
 
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp(appBarConfiguration)
     }
 
 

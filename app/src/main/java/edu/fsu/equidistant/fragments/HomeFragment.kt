@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
+import edu.fsu.equidistant.data.MeetingID
 import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
@@ -37,10 +38,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
+
         createDocument()
 
         val usersList: MutableList<User> = mutableListOf()
-        usersAdapter = UsersAdapter(usersList, viewModel.meetingID)
+        usersAdapter = UsersAdapter(usersList)
         val binding = FragmentHomeBinding.bind(view)
 
         binding.apply {
@@ -104,7 +106,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     return@addSnapshotListener
                 }
 
-                // TODO(): Perhaps use ListAdapter DiffUtil instead of clear() or FirestoreRecyclerView (auto updates)
                 usersList.clear()
 
                 for (document in documents!!) {
@@ -137,9 +138,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun createDocument() {
-        database.collection("meetings")
-            .document(viewModel.meetingID.toString())
-            .set({})
+        val docRef = database.collection("meetings")
+            .document(MeetingID.meetingID.toString())
+
+        docRef.get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    Log.d(TAG, "Doc exists!")
+                } else  {
+                    database.collection("meetings")
+                        .document(MeetingID.meetingID.toString())
+                        .set({})
+                }
+
+            }
+            .addOnFailureListener { exception ->
+                Log.d(TAG, "get failed with ", exception)
+            }
+
     }
 }
 
