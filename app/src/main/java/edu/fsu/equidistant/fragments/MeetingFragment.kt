@@ -7,7 +7,6 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.MeetingAdapter
@@ -52,36 +51,34 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         usersList: MutableList<User>
     ) {
 
-        database.collection("meetings").document(MeetingID.meetingID.toString()).get()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val document: DocumentSnapshot? = task.result
-                    if (document?.exists() == true) {
-                        val map: MutableMap<String, Any> = document.data as MutableMap<String, Any>
-                        for (entry in map.entries) {
-                            if (entry.key == "users") {
-                                val list: ArrayList<Map<String, Any>> =
-                                    entry.value as ArrayList<Map<String, Any>>
-
-                                for (user in list) {
-                                    val user = User(
-                                        user["username"].toString(),
-                                        user["email"].toString(),
-                                        user["token"].toString(),
-                                        user["longitude"] as Double,
-                                        user["latitude"] as Double
-                                    )
-
-                                    usersList.add(user)
-                                }
-                            }
-                        }
-                    }
-
-                    Log.d(TAG, usersList.toString())
-                    binding.meetingRecyclerView.adapter = meetingAdapter
+        database.collection("meetings")
+            .document(MeetingID.meetingID.toString())
+            .addSnapshotListener { document, error ->
+                if (error != null) {
+                    Log.w(TAG, "Listen failed.", error)
+                    return@addSnapshotListener
                 }
 
+                if (document?.exists() == true) {
+                  val list: ArrayList<Map<String, Any>> =
+                      document.get("users") as ArrayList<Map<String, Any>>
+
+                    usersList.clear()
+
+                    for (user in list) {
+                        val userInMeeting = User(
+                            user["username"].toString(),
+                            user["email"].toString(),
+                            user["token"].toString()
+                        )
+
+                        usersList.add(userInMeeting)
+                    }
+
+
+                }
+
+                binding.meetingRecyclerView.adapter = meetingAdapter
             }
     }
 }

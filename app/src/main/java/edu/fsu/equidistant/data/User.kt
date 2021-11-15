@@ -1,7 +1,6 @@
 package edu.fsu.equidistant.data
 
 import android.os.Parcelable
-import java.util.*
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
