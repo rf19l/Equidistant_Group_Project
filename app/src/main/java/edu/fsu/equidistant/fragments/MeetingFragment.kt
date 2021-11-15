@@ -59,23 +59,30 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                     return@addSnapshotListener
                 }
 
-                if (document?.exists() == true) {
-                  val list: ArrayList<Map<String, Any>> =
-                      document.get("users") as ArrayList<Map<String, Any>>
+                if (document != null) {
+                    if (document.exists()) {
+                        val users = document.get("users")
 
-                    usersList.clear()
+                        if (users != null) {
+                            val list: ArrayList<Map<String, Any>> =
+                                users as ArrayList<Map<String, Any>>
 
-                    for (user in list) {
-                        val userInMeeting = User(
-                            user["username"].toString(),
-                            user["email"].toString(),
-                            user["token"].toString()
-                        )
+                            usersList.clear()
 
-                        usersList.add(userInMeeting)
+                            for (user in list) {
+                                val userInMeeting = User(
+                                    user["username"].toString(),
+                                    user["email"].toString(),
+                                    user["token"].toString()
+                                )
+
+                                usersList.add(userInMeeting)
+                            }
+
+                        } else {
+                            Log.d(TAG, "users array is null")
+                        }
                     }
-
-
                 }
 
                 binding.meetingRecyclerView.adapter = meetingAdapter

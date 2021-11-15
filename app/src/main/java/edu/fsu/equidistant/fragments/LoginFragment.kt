@@ -18,27 +18,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    override fun onStart() {
-        super.onStart()
-
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
-            val email = FirebaseAuth.getInstance().currentUser!!.email
-            val action = email?.let {
-                LoginFragmentDirections.actionLoginFragmentToHomeFragment(
-                    it,
-                    firebaseUser
-                )
-            }
-
-            if (action != null) {
-                retrieveAndStoreToken()
-                findNavController().navigate(action)
-            }
-
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -110,7 +89,5 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 }
             }
 
-
     }
-
 }

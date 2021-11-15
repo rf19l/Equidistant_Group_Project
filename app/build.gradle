@@ -5,6 +5,7 @@ plugins {
     id "org.jetbrains.kotlin.plugin.parcelize"
 }
 
+//  changed safeargs from ..safeargs.kotlin to just safeargs for quick fix.
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
@@ -73,7 +74,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
     /* Coroutines Dependency */
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
 
     /* Retrofit Dependencies */
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'

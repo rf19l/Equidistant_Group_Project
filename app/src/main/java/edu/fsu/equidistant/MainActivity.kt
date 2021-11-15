@@ -5,7 +5,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
@@ -51,6 +50,7 @@ class MainActivity : AppCompatActivity() {
 
             bottomNavigation.setupWithNavController(navController)
         }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -15,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.MeetingID
 import edu.fsu.equidistant.data.SharedViewModel
@@ -33,6 +34,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val viewModel: SharedViewModel by viewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
+
+    override fun onStart() {
+        super.onStart()
+
+        if (FirebaseAuth.getInstance().currentUser == null) {
+            val action = HomeFragmentDirections.actionHomeFragmentToLoginFragment()
+            findNavController().navigate(action)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -156,5 +166,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
 
     }
+
+    private fun retrieveAndStoreToken() {
+        val uid = FirebaseAuth.getInstance().currentUser!!.uid
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val token: String? = task.result
+
+                    val userRef = database.collection("users").document(uid)
+                    userRef
+                        .update("token", token)
+                        .addOnSuccessListener { Log.d(TAG, "DocumentSnapshot successfully updated!") }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error updating document", e) }
+                }
+            }
+    }
+
 }
 
