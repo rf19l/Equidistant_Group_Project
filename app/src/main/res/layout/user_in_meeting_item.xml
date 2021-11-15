@@ -63,7 +63,7 @@
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="8dp"
-            android:text="invite" />
+            android:text="Remove" />
 
     </RelativeLayout>
 
