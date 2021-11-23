@@ -21,7 +21,9 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class UsersAdapter(
-    private var usersList: MutableList<User>) :
+    private var usersList: MutableList<User>,
+    private val meetingID: UUID
+) :
     RecyclerView.Adapter<UsersAdapter.UserViewHolder>(), Filterable {
 
     private lateinit var usersListFull: MutableList<User>
@@ -123,7 +125,7 @@ class UsersAdapter(
     }
 
     private fun addUserToMeeting(user: User) {
-        val meetingRef = database.collection("meetings").document(MeetingID.meetingID.toString())
+        val meetingRef = database.collection("meetings").document(meetingID.toString())
         meetingRef.update("users", FieldValue.arrayUnion(user))
     }
 }
