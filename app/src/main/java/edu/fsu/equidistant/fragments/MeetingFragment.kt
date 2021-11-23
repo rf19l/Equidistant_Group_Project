@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.MeetingAdapter
-import edu.fsu.equidistant.data.MeetingID
 import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.databinding.FragmentMeetingBinding
@@ -20,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
-    private val viewModel: SharedViewModel by viewModels()
+    private val viewModel: SharedViewModel by activityViewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
 
@@ -52,7 +51,7 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
     ) {
 
         database.collection("meetings")
-            .document(MeetingID.meetingID.toString())
+            .document(viewModel.meetingID.toString())
             .addSnapshotListener { document, error ->
                 if (error != null) {
                     Log.w(TAG, "Listen failed.", error)

@@ -9,7 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,7 +17,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import edu.fsu.equidistant.R
-import edu.fsu.equidistant.data.MeetingID
 import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
@@ -31,7 +30,7 @@ import kotlin.system.exitProcess
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val args: HomeFragmentArgs by navArgs()
-    private val viewModel: SharedViewModel by viewModels()
+    private val viewModel: SharedViewModel by activityViewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
 
@@ -42,6 +41,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val action = HomeFragmentDirections.actionHomeFragmentToLoginFragment()
             findNavController().navigate(action)
         }
+
+        retrieveAndStoreToken()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,7 +52,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         createDocument()
 
         val usersList: MutableList<User> = mutableListOf()
-        usersAdapter = UsersAdapter(usersList)
+        usersAdapter = UsersAdapter(usersList, viewModel.meetingID)
         val binding = FragmentHomeBinding.bind(view)
 
         binding.apply {
@@ -148,7 +149,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun createDocument() {
         val docRef = database.collection("meetings")
-            .document(MeetingID.meetingID.toString())
+            .document(viewModel.meetingID.toString())
 
         docRef.get()
             .addOnSuccessListener { document ->
@@ -156,7 +157,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     Log.d(TAG, "Doc exists!")
                 } else  {
                     database.collection("meetings")
-                        .document(MeetingID.meetingID.toString())
+                        .document(viewModel.meetingID.toString())
                         .set({})
                 }
 
