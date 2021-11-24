@@ -9,7 +9,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
