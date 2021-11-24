@@ -49,7 +49,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     }
 
-
     private fun isUsernameOrPasswordEmpty(username: String, password: String) =
         username.isEmpty() || password.isEmpty()
 
@@ -58,6 +57,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val firebaseUser = FirebaseAuth.getInstance().currentUser!!.uid
+                    Log.d(TAG, "LoginFragment: currentUser $firebaseUser")
                     val action = LoginFragmentDirections
                         .actionLoginFragmentToHomeFragment(email, firebaseUser)
 

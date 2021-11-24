@@ -93,7 +93,9 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
         val data = hashMapOf(
             "email" to email,
             "username" to username,
-            "token" to null
+            "token" to null,
+            "longitude" to 0.0,
+            "latitude" to 0.0
         )
 
         database.collection("users").document(uid).set(data)
