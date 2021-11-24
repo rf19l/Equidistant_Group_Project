@@ -1,6 +1,7 @@
 package edu.fsu.equidistant.fragments
 
 import android.content.ContentValues.TAG
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,6 +17,7 @@ import edu.fsu.equidistant.databinding.FragmentMeetingBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
@@ -37,6 +39,11 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
             }
 
             textViewMeetingUsers.text = viewModel.meetingID.toString()
+
+            buttonStartMeeting.setOnClickListener {
+                val location = getCenterPoint(usersList)
+                Log.d(TAG, "CenterPoint: $location")
+            }
         }
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -72,7 +79,9 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                                 val userInMeeting = User(
                                     user["username"].toString(),
                                     user["email"].toString(),
-                                    user["token"].toString()
+                                    user["token"].toString(),
+                                    user["longitude"] as Double,
+                                    user["latitude"] as Double
                                 )
 
                                 usersList.add(userInMeeting)
@@ -86,5 +95,33 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
                 binding.meetingRecyclerView.adapter = meetingAdapter
             }
+    }
+
+    private fun getCenterPoint(usersList: MutableList<User>): Location {
+        var x = 0.0
+        var y = 0.0
+        var z = 0.0
+        for (user in usersList) {
+            Log.d(TAG, "getCenterPoint: user longitude = ${user.longitude}, latitude = ${user.latitude}")
+            val latitude = user.latitude * Math.PI / 180
+            val longitude = user.longitude * Math.PI / 180
+            val x1 = Math.cos(latitude) * Math.cos(longitude)
+            val y1 = Math.cos(latitude) * Math.sin(longitude)
+            val z1 = Math.sin(latitude)
+            x += x1
+            y += y1
+            z += z1
+        }
+        x /= usersList.size.toDouble()
+        y /= usersList.size.toDouble()
+        z /= usersList.size.toDouble()
+        val centerhyp = Math.sqrt(x * x + y * y)
+        val centerlat = Math.atan2(z, centerhyp)
+        val centerlon = Math.atan2(y, x)
+        val centerpoint = Location("")
+        centerpoint.latitude = centerlat * 180 / Math.PI
+        centerpoint.longitude = centerlon * 180 / Math.PI
+        Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
+        return centerpoint
     }
 }
