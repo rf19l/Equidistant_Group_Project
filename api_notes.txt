@@ -1,0 +1,2 @@
+places api - basic data is free, this includes address, vicinity, etc
+

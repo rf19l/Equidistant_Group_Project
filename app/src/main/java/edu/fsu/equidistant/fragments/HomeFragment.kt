@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.*
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -38,7 +39,46 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.system.exitProcess
 
+private const val TAG = "HomeFragment"
+
 class HomeFragment : Fragment(R.layout.fragment_home) {
+
+    private var locationServiceBound = false
+
+
+    val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.d("DEBUG","permission granted")
+                locationService?.subscribeToLocationUpdates()
+
+            } else {
+                Log.d("DEBUG","permission denied")
+                Snackbar.make(
+                    requireView().findViewById(R.id.fragment_home),
+                    R.string.permission_denied_explanation,
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(R.string.settings) {
+                        // Build intent that displays the App settings screen.
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts(
+                            "package",
+                            BuildConfig.APPLICATION_ID,
+                            null
+                        )
+                        intent.data = uri
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                    .show()
+
+            }
+        }
+
 
     private val args: HomeFragmentArgs by navArgs()
     private val viewModel: SharedViewModel by activityViewModels()
@@ -59,6 +99,40 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         requireActivity().bindService(serviceIntent, foregroundOnlyServiceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    // Provides location updates for while-in-use feature.
+    private var locationService: LocationService? = null
+
+    // Monitors connection to the while-in-use service.
+    private val foregroundOnlyServiceConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            val binder = service as LocationService.LocalBinder
+            locationService = binder.service
+            if (foregroundPermissionApproved()){
+            locationService!!.subscribeToLocationUpdates()}
+           // locationService!!.unsubscribeToLocationUpdates()
+           // locationService!!.subscribeToLocationUpdates()
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            locationService = null
+        }
+    }
+
+    // Keeps track of users location sharing preferences
+    private lateinit var sharedPreferences: SharedPreferences
+
+    // Listens for location broadcasts from LocationService.
+    private lateinit var locationServiceBroadcastReceiver: HomeFragment.LocationServiceBroadcastReceiver
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        locationServiceBroadcastReceiver = LocationServiceBroadcastReceiver()
+        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    }
+
+    //TODO CLEAN UP, DONT NEED ANYMORE
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
@@ -80,14 +154,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             getUsersList(usersAdapter, binding, usersList)
         }
 
+
         if (foregroundPermissionApproved()) {
             foregroundOnlyLocationService?.subscribeToLocationUpdates()
                 ?: Log.d(TAG, "Service Not Bound")
         } else {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+
         }
 
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -275,6 +352,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                     .show()
             }
+
         }
 
     override fun onStop() {

@@ -13,6 +13,7 @@ import edu.fsu.equidistant.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
+
     private lateinit var navController: NavController
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -51,10 +52,12 @@ class MainActivity : AppCompatActivity() {
             bottomNavigation.setupWithNavController(navController)
         }
 
+
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration)
     }
+
 
 }
