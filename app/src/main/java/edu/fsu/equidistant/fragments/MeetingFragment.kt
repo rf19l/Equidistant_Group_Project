@@ -41,7 +41,7 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                 setHasFixedSize(false)
             }
 
-            textViewMeetingUsers.text = viewModel.meetingID.toString()
+            textViewMeetingId.text = viewModel.meetingID
 
             buttonStartMeeting.setOnClickListener {
                 val location = getCenterPoint(usersList)
@@ -58,6 +58,7 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
             Log.d(TAG, "MeetingArguments: ${arguments.getString("meetingID").toString()}")
             viewModel.meetingID = arguments.getString("meetingID").toString()
             getUsersList(meetingAdapter, binding, usersList)
+            binding.textViewMeetingId.text = viewModel.meetingID
         }
     }
 
@@ -106,9 +107,6 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                 binding.meetingRecyclerView.adapter = meetingAdapter
             }
     }
-
-
-
 
 
     private fun getCenterPoint(usersList: MutableList<User>): Location {
