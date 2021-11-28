@@ -22,7 +22,7 @@ import java.util.*
 
 class UsersAdapter(
     private var usersList: MutableList<User>,
-    private val meetingID: UUID
+    private val meetingID: String
 ) :
     RecyclerView.Adapter<UsersAdapter.UserViewHolder>(), Filterable {
 
@@ -55,7 +55,7 @@ class UsersAdapter(
                         val message = "You've got a meeting invite! Touch me!"
                         val title = "Invitation to Meet in the Middle"
                         PushNotification(
-                            NotificationData(title, message),
+                            NotificationData(title, message, meetingID),
                             user.token
                         ).also {
                             sendNotification(it)
