@@ -54,8 +54,6 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
         user = FirebaseAuth.getInstance().currentUser
-
-
     /*
         Get image from gallery, sets it as the users profile photo
         and uploads it to firebase storage
@@ -128,7 +126,6 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
                 }.addOnFailureListener{
                     Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
                 }
-
             }
 
             /*
@@ -151,10 +148,7 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
                     user!!.uid
                 )
                 findNavController().navigate(action)
-
             }
-
-
         }
 
 
@@ -202,8 +196,4 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
         view.draw(canvas)
         return bitmap
     }
-
-
-
-
 }
