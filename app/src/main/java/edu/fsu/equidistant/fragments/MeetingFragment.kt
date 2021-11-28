@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
@@ -17,6 +18,8 @@ import edu.fsu.equidistant.databinding.FragmentMeetingBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.log
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
@@ -47,6 +50,13 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         }
 
         CoroutineScope(Dispatchers.IO).launch {
+            getUsersList(meetingAdapter, binding, usersList)
+        }
+
+        val arguments = arguments
+        if (arguments != null) {
+            Log.d(TAG, "MeetingArguments: ${arguments.getString("meetingID").toString()}")
+            viewModel.meetingID = arguments.getString("meetingID").toString()
             getUsersList(meetingAdapter, binding, usersList)
         }
     }
@@ -96,6 +106,10 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                 binding.meetingRecyclerView.adapter = meetingAdapter
             }
     }
+
+
+
+
 
     private fun getCenterPoint(usersList: MutableList<User>): Location {
         var x = 0.0
