@@ -79,5 +79,20 @@
         android:id="@+id/meetingFragment"
         android:name="edu.fsu.equidistant.fragments.MeetingFragment"
         android:label="Meeting"
-        tools:layout="@layout/fragment_meeting" />
+        tools:layout="@layout/fragment_meeting" >
+        <action
+            android:id="@+id/action_meetingFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="edu.fsu.equidistant.fragments.MapFragment"
+        android:label="MapFragment" >
+        <argument
+            android:name="longitude"
+            android:defaultValue="0.0" />
+        <argument
+            android:name="latitude"
+            android:defaultValue="0.0" />
+    </fragment>
 </navigation>

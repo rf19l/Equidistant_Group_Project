@@ -7,7 +7,10 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.navArgs
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.fsu.equidistant.R
@@ -15,18 +18,30 @@ import edu.fsu.equidistant.data.MeetingAdapter
 import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.databinding.FragmentMeetingBinding
+import edu.fsu.equidistant.places.GooglePlaceModel
+import edu.fsu.equidistant.places.GoogleResponseModel
+import edu.fsu.equidistant.places.LocationViewModel
+import edu.fsu.equidistant.places.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.math.log
+import okhttp3.Request.Builder
+import java.io.IOException
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
     private val viewModel: SharedViewModel by activityViewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
+    private lateinit var centerLocation: Location
+    private val locationViewModel: LocationViewModel by viewModels()
+    private lateinit var googlePlaceList: ArrayList<GooglePlaceModel>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -34,6 +49,7 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
         val usersList: MutableList<User> = mutableListOf()
         meetingAdapter = MeetingAdapter(usersList)
+        googlePlaceList = ArrayList()
 
         binding.apply {
             meetingRecyclerView.apply {
@@ -44,8 +60,14 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
             textViewMeetingId.text = viewModel.meetingID
 
             buttonStartMeeting.setOnClickListener {
-                val location = getCenterPoint(usersList)
-                Log.d(TAG, "CenterPoint: $location")
+                centerLocation = getCenterPoint(usersList)
+                Log.d(TAG, "CenterPoint: $centerLocation")
+
+//                CoroutineScope(Dispatchers.IO).launch {
+//                    getPlaces()
+//                }
+
+                getNearbyPlace()
             }
         }
 
@@ -136,4 +158,58 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
         return centerpoint
     }
+
+    private fun getPlaces() {
+        val client: OkHttpClient = OkHttpClient().newBuilder()
+            .build()
+        val request: Request = Builder()
+            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=AIzaSyCUNlT9fS_FgParpYQXGkIO_LMdX7jvEHA")
+            .method("GET", null)
+            .build()
+        try {
+            val response: Response = client.newCall(request).execute()
+            Log.d(TAG, "Response: $response")
+        } catch(e: IOException) {
+            Log.d(TAG, e.toString())
+        }
+    }
+
+    private fun getNearbyPlace() {
+        val url = ("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
+                + centerLocation.latitude + "," + centerLocation.longitude
+                + "&radius=7500&type=restaurant&key=MYKEYHERE")
+
+        lifecycleScope.launchWhenStarted {
+            locationViewModel.getNearbyPlace(url).collect {
+                when (it) {
+                    is State.Loading -> {
+                        if (it.flag == true) {
+
+                        }
+                    }
+
+                    is State.Success -> {
+                        val googleResponseModel: GoogleResponseModel =
+                            it.data as GoogleResponseModel
+
+                        if (googleResponseModel.googlePlaceModelList != null &&
+                                googleResponseModel.googlePlaceModelList.isNotEmpty()) {
+                            googlePlaceList.clear()
+
+                            for (i in googleResponseModel.googlePlaceModelList.indices) {
+                                googlePlaceList.add(googleResponseModel.googlePlaceModelList[i])
+                            }
+
+                            Log.d(TAG, "googlePlaceList array: $googlePlaceList")
+                        }
+                    }
+
+                    is State.Failed -> {
+
+                    }
+                }
+            }
+        }
+    }
+
 }
