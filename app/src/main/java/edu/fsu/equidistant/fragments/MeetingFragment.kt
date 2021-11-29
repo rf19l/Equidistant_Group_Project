@@ -40,7 +40,6 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
     private lateinit var centerLocation: Location
-    private val locationViewModel: LocationViewModel by viewModels()
     private lateinit var googlePlaceList: ArrayList<GooglePlaceModel>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,12 +61,9 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
             buttonStartMeeting.setOnClickListener {
                 centerLocation = getCenterPoint(usersList)
                 Log.d(TAG, "CenterPoint: $centerLocation")
-
-//                CoroutineScope(Dispatchers.IO).launch {
-//                    getPlaces()
-//                }
-
-                getNearbyPlace()
+                val action = MeetingFragmentDirections
+                    .actionMeetingFragmentToMapFragment(centerLocation)
+                findNavController().navigate(action)
             }
         }
 
@@ -157,59 +153,6 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         centerpoint.longitude = centerlon * 180 / Math.PI
         Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
         return centerpoint
-    }
-
-    private fun getPlaces() {
-        val client: OkHttpClient = OkHttpClient().newBuilder()
-            .build()
-        val request: Request = Builder()
-            .url("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=-33.8670522%2C151.1957362&radius=1500&type=restaurant&keyword=cruise&key=AIzaSyCUNlT9fS_FgParpYQXGkIO_LMdX7jvEHA")
-            .method("GET", null)
-            .build()
-        try {
-            val response: Response = client.newCall(request).execute()
-            Log.d(TAG, "Response: $response")
-        } catch(e: IOException) {
-            Log.d(TAG, e.toString())
-        }
-    }
-
-    private fun getNearbyPlace() {
-        val url = ("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
-                + centerLocation.latitude + "," + centerLocation.longitude
-                + "&radius=7500&type=restaurant&key=AIzaSyCUNlT9fS_FgParpYQXGkIO_LMdX7jvEHA")
-
-        lifecycleScope.launchWhenStarted {
-            locationViewModel.getNearbyPlace(url).collect {
-                when (it) {
-                    is State.Loading -> {
-                        if (it.flag == true) {
-
-                        }
-                    }
-
-                    is State.Success -> {
-                        val googleResponseModel: GoogleResponseModel =
-                            it.data as GoogleResponseModel
-
-                        if (googleResponseModel.googlePlaceModelList != null &&
-                                googleResponseModel.googlePlaceModelList.isNotEmpty()) {
-                            googlePlaceList.clear()
-
-                            for (i in googleResponseModel.googlePlaceModelList.indices) {
-                                googlePlaceList.add(googleResponseModel.googlePlaceModelList[i])
-                            }
-
-                            Log.d(TAG, "googlePlaceList array: $googlePlaceList")
-                        }
-                    }
-
-                    is State.Failed -> {
-
-                    }
-                }
-            }
-        }
     }
 
 }
