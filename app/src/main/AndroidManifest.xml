@@ -40,7 +40,9 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".MainActivity$MyBroadcastReceiver" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="MY_KEY"/>
     </application>
 
 

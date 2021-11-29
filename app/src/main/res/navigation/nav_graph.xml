@@ -89,10 +89,7 @@
         android:name="edu.fsu.equidistant.fragments.MapFragment"
         android:label="MapFragment" >
         <argument
-            android:name="longitude"
-            android:defaultValue="0.0" />
-        <argument
-            android:name="latitude"
-            android:defaultValue="0.0" />
+            android:name="location"
+            app:argType="android.location.Location" />
     </fragment>
 </navigation>

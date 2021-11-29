@@ -8,9 +8,5 @@
         android:id="@+id/meetingFragment"
         android:icon="@drawable/ic_meeting_tab"
         android:title="Meeting" />
-    <item
-        android:id="@+id/navigationFragment"
-        android:icon="@drawable/ic_map"
-        android:title="Map" />
 
 </menu>

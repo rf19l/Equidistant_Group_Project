@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             navController.addOnDestinationChangedListener { _, destination, _ ->
                 if (destination.id == R.id.loginFragment
                     || destination.id == R.id.registerFragment
+                    || destination.id == R.id.mapFragment
                 ) {
                     bottomNavigation.visibility = View.GONE
                 } else {
