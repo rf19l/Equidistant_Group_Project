@@ -154,5 +154,3 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
         return centerpoint
     }
-
-}
