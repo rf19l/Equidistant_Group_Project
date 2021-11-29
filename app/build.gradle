@@ -8,7 +8,7 @@ plugins {
 //  changed safeargs from ..safeargs.kotlin to just safeargs for quick fix.
 apply plugin: "androidx.navigation.safeargs.kotlin"
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdk 31
@@ -81,6 +81,7 @@ dependencies {
     /* Retrofit Dependencies */
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+    implementation "com.squareup.retrofit2:converter-moshi:2.6.0"
 
     /* Places API */
     implementation 'com.google.android.libraries.places:places:2.5.0'
