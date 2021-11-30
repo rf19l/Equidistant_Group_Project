@@ -12,13 +12,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.android.libraries.places.api.model.Place
 import com.google.android.material.snackbar.Snackbar
 import edu.fsu.equidistant.R
+import edu.fsu.equidistant.data.PlacesAdapter
 import edu.fsu.equidistant.databinding.FragmentMapBinding
 import edu.fsu.equidistant.places.*
 import kotlinx.coroutines.flow.collect
@@ -34,6 +37,7 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
     private lateinit var loadingDialog: LoadingDialog
     private lateinit var binding: FragmentMapBinding
     private var currentMarker: Marker? = null
+    private lateinit var placesAdapter: PlacesAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,10 +46,18 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
         binding = FragmentMapBinding.bind(view)
         centerLocation = args.location
         loadingDialog = LoadingDialog(requireActivity())
+        placesAdapter = PlacesAdapter(googlePlaceList)
 
         val mapFragment =
             (childFragmentManager.findFragmentById(R.id.homeMap) as SupportMapFragment?)
         mapFragment?.getMapAsync(this)
+
+        binding.apply {
+            placesRecyclerView.apply {
+                layoutManager = LinearLayoutManager(requireContext())
+                setHasFixedSize(false)
+            }
+        }
 
     }
 
@@ -88,6 +100,7 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
 
                             Log.d(ContentValues.TAG, "googlePlaceList array: $googlePlaceList")
                             addCurrentMarker()
+                            binding.placesRecyclerView.adapter = placesAdapter
                         } else {
                             googlePlaceList.clear()
                             map?.clear()
