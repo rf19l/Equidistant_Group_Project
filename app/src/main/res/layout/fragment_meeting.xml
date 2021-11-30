@@ -33,39 +33,12 @@
                 style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/purple_700"
                 android:layout_below="@id/text_view_meeting_users"
                 android:paddingStart="16dp"
                 android:paddingBottom="4dp"
-                android:text="random_numbers_and_letters" />
+                android:text="random_numbers_and_letters"
+                android:textColor="?attr/colorSecondary" />
 
-<!--            <RelativeLayout-->
-<!--                android:id="@+id/button_wrapper"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_below="@id/text_view_meeting_id"-->
-<!--                android:layout_centerHorizontal="true"-->
-<!--                android:layout_margin="8dp">-->
-
-<!--                <com.google.android.material.button.MaterialButton-->
-<!--                    android:id="@+id/button_start_meeting"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_alignParentEnd="true"-->
-<!--                    android:layout_marginStart="32dp"-->
-<!--                    android:layout_marginEnd="32dp"-->
-<!--                    android:text="Start" />-->
-
-<!--&lt;!&ndash;                <com.google.android.material.button.MaterialButton&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:id="@+id/button_disband_meeting"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_width="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_height="wrap_content"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_alignParentEnd="true"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_marginStart="32dp"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:layout_marginEnd="32dp"&ndash;&gt;-->
-<!--&lt;!&ndash;                    android:text="Disband" />&ndash;&gt;-->
-
-<!--            </RelativeLayout>-->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/meeting_recycler_view"
@@ -81,6 +54,7 @@
         </RelativeLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/button_start_meeting"
