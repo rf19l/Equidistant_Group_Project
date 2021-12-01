@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.fsu.equidistant.databinding.UserInMeetingItemBinding
-import edu.fsu.equidistant.databinding.UserListItemBinding
 
 class MeetingAdapter(private var usersList: MutableList<User>) :
     RecyclerView.Adapter<MeetingAdapter.MeetingViewHolder>() {

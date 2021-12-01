@@ -37,7 +37,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
-                android:textColor="@color/black"
+                android:textColor="?attr/colorOnSecondary"
                 android:textSize="20sp"
                 tools:text="username69" />
 

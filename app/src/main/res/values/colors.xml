@@ -10,4 +10,6 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="offWhite">#f5f5f5</color>
     <color name="offWhiteDarker">#eeeeee</color>
+    <color name="darkPrimary">#1e1e1e</color>
+    <color name="darkerPrimary">#121212</color>
 </resources>

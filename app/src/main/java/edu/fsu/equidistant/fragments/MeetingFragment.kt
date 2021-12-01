@@ -7,9 +7,6 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,21 +15,10 @@ import edu.fsu.equidistant.data.MeetingAdapter
 import edu.fsu.equidistant.data.SharedViewModel
 import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.databinding.FragmentMeetingBinding
-import edu.fsu.equidistant.places.GooglePlaceModel
-import edu.fsu.equidistant.places.GoogleResponseModel
-import edu.fsu.equidistant.places.LocationViewModel
-import edu.fsu.equidistant.places.State
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import java.util.*
-import kotlin.collections.ArrayList
-import okhttp3.Request.Builder
-import java.io.IOException
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
@@ -40,7 +26,6 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
     private lateinit var centerLocation: Location
-    private lateinit var googlePlaceList: ArrayList<GooglePlaceModel>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,7 +33,6 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
         val usersList: MutableList<User> = mutableListOf()
         meetingAdapter = MeetingAdapter(usersList)
-        googlePlaceList = ArrayList()
 
         binding.apply {
             meetingRecyclerView.apply {
