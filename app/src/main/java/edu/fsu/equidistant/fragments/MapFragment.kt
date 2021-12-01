@@ -18,13 +18,13 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import com.google.android.libraries.places.api.model.Place
 import com.google.android.material.snackbar.Snackbar
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.PlacesAdapter
 import edu.fsu.equidistant.databinding.FragmentMapBinding
 import edu.fsu.equidistant.places.*
 import kotlinx.coroutines.flow.collect
+import java.lang.Math.abs
 
 
 class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
@@ -97,6 +97,8 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
                                 googlePlaceList.add(googleResponseModel.googlePlaceModelList[i])
                                 addMarker(googleResponseModel.googlePlaceModelList[i], i)
                             }
+                            /* Sort places in descending order based on distance from the Center point */
+                            sortPlaces()
 
                             Log.d(ContentValues.TAG, "googlePlaceList array: $googlePlaceList")
                             addCurrentMarker()
@@ -171,7 +173,32 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
             ), 13f
         )
 
-        map?.animateCamera(cameraUpdate)
+        val animateCamera = map?.animateCamera(cameraUpdate)
+    }
+
+    private fun sortPlaces(){
+        if (googlePlaceList.isEmpty()) {
+            return
+        }
+        val distanceFromCenterList:ArrayList<Pair<Int,Double>> = ArrayList()
+        for (i in 0..googlePlaceList.size-1){
+            val diff =
+                Pair(abs(googlePlaceList[i].geometry?.location?.lat?.let { abs(it) }!!.minus(abs(centerLocation.latitude))),
+                (abs(googlePlaceList[i].geometry?.location?.lng?.let { abs(it) }!!.minus(abs(centerLocation.longitude)))))
+            distanceFromCenterList.add(Pair(i,diff.first+diff.second))
+        Log.d("TAG",diff.toString())
+        }
+        val sorted = distanceFromCenterList.sortedWith(compareBy({it.second}))
+        val new = ArrayList(sorted)
+        val temp: ArrayList<GooglePlaceModel> = ArrayList(googlePlaceList)
+        for(i in 0..googlePlaceList.size-1){
+            temp[i] = googlePlaceList[new[i].first]
+        }
+        for(i in 0..googlePlaceList.size-1){
+            googlePlaceList[i] = temp[i]
+            new[i] = Pair(i,new[i].second)
+        }
+        Log.d("TAG","End of sortPlaces()")
     }
 
 }
