@@ -116,7 +116,10 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         var y = 0.0
         var z = 0.0
         for (user in usersList) {
-            Log.d(TAG, "getCenterPoint: user longitude = ${user.longitude}, latitude = ${user.latitude}")
+            Log.d(
+                TAG,
+                "getCenterPoint: user longitude = ${user.longitude}, latitude = ${user.latitude}"
+            )
             val latitude = user.latitude * Math.PI / 180
             val longitude = user.longitude * Math.PI / 180
             val x1 = Math.cos(latitude) * Math.cos(longitude)
@@ -135,6 +138,10 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         val centerpoint = Location("")
         centerpoint.latitude = centerlat * 180 / Math.PI
         centerpoint.longitude = centerlon * 180 / Math.PI
-        Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
+        Log.d(
+            TAG,
+            "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}"
+        )
         return centerpoint
     }
+}
