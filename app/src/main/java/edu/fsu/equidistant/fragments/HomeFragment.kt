@@ -147,12 +147,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         data["email"].toString(),
                         data["token"].toString(),
                         data["longitude"] as Double,
-                        data["latitude"] as Double
+                        data["latitude"] as Double,
+                        document.id
                     )
 
                     Log.d(TAG, "GetUsersList longitude: ${data["longitude"]}")
-
-                    usersList.add(user)
+                    if(user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
+                        usersList.add(user)
+                    }
                 }
 
                 binding.recyclerViewUserList.adapter = usersAdapter

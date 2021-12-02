@@ -9,5 +9,7 @@ data class User(
     val email: String = "",
     var token: String = "",
     val longitude: Double = 0.0,
-    val latitude: Double = 0.0
+    val latitude: Double = 0.0,
+    val uid: String = ""
+
 ) : Parcelable
