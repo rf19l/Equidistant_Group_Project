@@ -167,13 +167,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         )
 
                         //TODO REMOVE THIS COMMENT TO HIDE SELF
-                        usersList.add(user)
                         Log.d(TAG, "GetUsersList longitude: ${data["longitude"]}")
-                        /*if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
+                        if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
                             usersList.add(user)
-                        }*
+                        }
 
-                         */
                     }
 
                     try {
