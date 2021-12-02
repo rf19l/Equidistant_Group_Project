@@ -149,7 +149,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 CoroutineScope(Dispatchers.IO).launch {
                     for (document in documents!!) {
                         val data = document.data
-                        val picture = fetchFirebasePicture(data["imageUri"] as Uri, document.id)
+                        val picture = fetchFirebasePicture(Uri.parse(data["imageUri"].toString()), document.id)
                         val user = User(
                             data["username"].toString(),
                             data["email"].toString(),
