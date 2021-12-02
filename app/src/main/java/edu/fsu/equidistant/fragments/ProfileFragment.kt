@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
 
-
+/* photoRef represents the firestore photo, imageUri represents component photo */
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -45,6 +45,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private var imageUri: Uri? = null
     private lateinit var bitmap:Bitmap
     private lateinit var username:String
+    private var profileFetched = false
 
     /* Data */
     private lateinit var profile: Profile
@@ -61,6 +62,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val view = binding!!.root
         CoroutineScope(Dispatchers.IO).launch {
             getUserProfile(binding!!)
+            while(!profileFetched){
+                Log.d("TAG","Waiting for profile fetch")
+            }
+            fetchFirebasePicture()
+
         }
         return view
     }
@@ -121,7 +127,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun getUserProfile(binding: FragmentProfileBinding){
-
+        if (profileFetched){
+            return
+        }
         FirebaseAuth.getInstance().currentUser!!.uid?.let {
             db.collection("users").document(it)
                 .addSnapshotListener { document, error ->
@@ -149,10 +157,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         bitmap = MediaStore.Images.Media.getBitmap(context?.getContentResolver(),imageUri )
                         binding.imageViewProfilePhoto.setImageBitmap(resizeBitmap(bitmap,600))
                          */
-                        imageUri = Uri.parse(tempUri)
-                        fetchFirebasePicture()
+                        //imageUri = Uri.parse(tempUri)
                     }
                     Log.d(ContentValues.TAG, "GetProfile for: ${data["username"]}")
+                    profileFetched=true
                 }
         }
     }
@@ -243,6 +251,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     }
 
     private fun fetchFirebasePicture(){
+        while(profile == null){
+            Log.d("TAG","waiting for profile fetch")
+        }
         if (profile.photoRef == null || profile.photoRef.isEmpty()){
             return
         }
@@ -267,8 +278,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private fun updateFirestoreImage(){
         val ref = db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid)
-
-// Set the "isCapital" field of the city 'DC'
         ref
             .update("imageUri", imageUri.toString())
             .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
