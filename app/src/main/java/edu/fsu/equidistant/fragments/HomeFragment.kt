@@ -148,6 +148,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
                 usersList.clear()
                 CoroutineScope(Dispatchers.Main).launch {
+                    usersList.clear()
                     for (document in documents!!) {
                         var picture:Bitmap? = null
                         val data = document.data
