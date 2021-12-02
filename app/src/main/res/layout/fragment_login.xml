@@ -52,6 +52,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_password_container"
         android:layout_centerInParent="true"
+        android:textColor="@color/white"
         android:text="@string/login" />
 
     <LinearLayout
