@@ -1,7 +1,10 @@
 package edu.fsu.equidistant.fragments
 
 import android.content.ContentValues.TAG
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,6 +13,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.MeetingAdapter
 import edu.fsu.equidistant.data.SharedViewModel
@@ -18,7 +23,9 @@ import edu.fsu.equidistant.databinding.FragmentMeetingBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
+import java.util.concurrent.CountDownLatch
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
@@ -26,6 +33,9 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
     private lateinit var centerLocation: Location
+
+    private val storage = Firebase.storage
+    val storageRef = storage.reference
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -81,32 +91,36 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                 if (document != null) {
                     if (document.exists()) {
                         val users = document.get("users")
-
+                        usersList.clear()
                         if (users != null) {
+                            CoroutineScope(Dispatchers.Main).launch {
                             val list: ArrayList<Map<String, Any>> =
                                 users as ArrayList<Map<String, Any>>
 
-                            usersList.clear()
-
-                            for (user in list) {
-                                val userInMeeting = User(
-                                    user["username"].toString(),
-                                    user["email"].toString(),
-                                    user["token"].toString(),
-                                    user["longitude"] as Double,
-                                    user["latitude"] as Double
-                                )
-
-                                usersList.add(userInMeeting)
+                                for (user in list) {
+                                    var picture: Bitmap? = null
+                                    CoroutineScope(Dispatchers.IO).launch{
+                                        picture=fetchFirebasePicture(Uri.parse(user["imageUri"].toString()),user["uid"].toString())
+                                    }.join()
+                                    val userInMeeting = User(
+                                        user["username"].toString(),
+                                        user["email"].toString(),
+                                        user["token"].toString(),
+                                        user["longitude"] as Double,
+                                        user["latitude"] as Double,
+                                        "none",
+                                        picture
+                                    )
+                                    if(usersList.size<list.size) {
+                                        usersList.add(userInMeeting)
+                                    }
+                                }
+                                binding.meetingRecyclerView.adapter = meetingAdapter
                             }
-
-                        } else {
-                            Log.d(TAG, "users array is null")
                         }
+
                     }
                 }
-
-                binding.meetingRecyclerView.adapter = meetingAdapter
             }
     }
 
@@ -116,7 +130,10 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         var y = 0.0
         var z = 0.0
         for (user in usersList) {
-            Log.d(TAG, "getCenterPoint: user longitude = ${user.longitude}, latitude = ${user.latitude}")
+            Log.d(
+                TAG,
+                "getCenterPoint: user longitude = ${user.longitude}, latitude = ${user.latitude}"
+            )
             val latitude = user.latitude * Math.PI / 180
             val longitude = user.longitude * Math.PI / 180
             val x1 = Math.cos(latitude) * Math.cos(longitude)
@@ -135,8 +152,60 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         val centerpoint = Location("")
         centerpoint.latitude = centerlat * 180 / Math.PI
         centerpoint.longitude = centerlon * 180 / Math.PI
-        Log.d(TAG, "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}")
+        Log.d(
+            TAG,
+            "getCenterPoint: longitude = ${centerpoint.longitude}, latitude = ${centerpoint.latitude}"
+        )
         return centerpoint
     }
+
+    private suspend fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap? = withContext(Dispatchers.IO){
+        var bmp: Bitmap? = null
+        val done = CountDownLatch(1)
+        if (imageUri == null || imageUri.toString().isEmpty()|| imageUri.toString() == "null"){
+            done.countDown()
+            return@withContext bmp
+        }
+        val imageRef = storageRef.child("users/"+ uid + "/" +imageUri)
+        val ONE_MB : Long = 1024 * 1024
+        val task = imageRef.getBytes(ONE_MB)
+            .addOnSuccessListener {
+                bmp = BitmapFactory.decodeByteArray(it,0,it.size)
+                Log.d("TAG","Fetched profile picture")
+
+
+            }.
+            addOnFailureListener{
+                Log.d("TAG","Failed to fetch profile picture")
+            }
+            .addOnCompleteListener{
+                done.countDown()
+            }
+        try{
+            done.await()
+        }catch(e:InterruptedException){
+            Log.d("TAG",e.message.toString())
+        }
+
+        bmp= bmp?.let { resizeBitmap(it,250) }
+        return@withContext bmp
+
+        //  return@withContext BitmapFactory.decodeByteArray(task.getResult(),0,task.getResult().size)
+    }
+
+    private fun resizeBitmap(source:Bitmap,maxLength:Int):Bitmap{
+        try {
+            if(source.height != maxLength || source.width != maxLength){
+                val result = Bitmap.createScaledBitmap(source, maxLength,maxLength,false)
+                return result
+            }
+            return source
+        } catch (e: Exception) {
+            return source
+        }
+    }
+
+
+
 
 }
