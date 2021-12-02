@@ -1,0 +1,52 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="312dp"
+    android:height="58dp"
+    android:viewportWidth="312"
+    android:viewportHeight="58">
+  <path
+      android:pathData="M49.81,43.883 L21.213,53.075 3.724,28.433 21.513,4.012 49.996,13.56Z"
+      android:strokeWidth="3.2393112"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"/>
+  <path
+      android:pathData="M28.766,27.024m-2.357,0a2.357,2.357 0,1 1,4.714 0a2.357,2.357 0,1 1,-4.714 0"
+      android:strokeWidth="0"
+      android:fillColor="#000000"
+      android:strokeColor="#00000000"/>
+  <path
+      android:pathData="M3.716,28.728C27.867,27.279 27.867,27.279 27.867,27.279Z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="0.976036"
+      android:strokeColor="#000000"
+      android:strokeLineCap="butt">
+  </path>
+  <path
+      android:pathData="m21.635,4.1c6.951,22.537 6.951,22.537 6.951,22.537v0,0 0L21.635,4.1 28.586,26.637Z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="0.976036"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="butt"/>
+  <path
+      android:pathData="m21.357,52.888c7.631,-25.976 0,0 0,0l7.631,-25.976z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="0.944359"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="butt"/>
+  <path
+      android:pathData="M49.738,13.994 L28.117,27.99 49.738,13.994 28.117,27.99Z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="0.976036"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="butt"/>
+  <path
+      android:pathData="M48.645,42.9 L39.016,35.272 27.326,26.012Z"
+      android:strokeLineJoin="miter"
+      android:strokeWidth="0.956982"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"
+      android:strokeLineCap="butt"/>
+</vector>
