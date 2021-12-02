@@ -12,6 +12,6 @@ data class User(
     val longitude: Double = 0.0,
     val latitude: Double = 0.0,
     val uid: String = "",
-    val bitmap: Bitmap? = null
-
+    val bitmap: Bitmap? = null,
+    var uri: String = ""
 ) : Parcelable

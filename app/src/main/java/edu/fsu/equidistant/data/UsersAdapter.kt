@@ -128,6 +128,14 @@ class UsersAdapter(
 
     private fun addUserToMeeting(user: User) {
         val meetingRef = database.collection("meetings").document(meetingID.toString())
-        meetingRef.update("users", FieldValue.arrayUnion(user))
+        val data = hashMapOf(
+            "uid" to user.uid,
+            "email" to user.email,
+            "latitude" to user.latitude,
+            "longitude" to user.longitude,
+            "token" to user.token,
+            "username" to user.username,
+            "imageUri" to user.uri)
+        meetingRef.update("users", FieldValue.arrayUnion(data))
     }
 }
