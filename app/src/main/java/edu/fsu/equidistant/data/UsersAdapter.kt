@@ -18,7 +18,6 @@ import edu.fsu.equidistant.notifications.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 class UsersAdapter(
     private var usersList: MutableList<User>,
@@ -70,6 +69,9 @@ class UsersAdapter(
             binding.apply {
                 textViewEmailList.text = user.email
                 textViewUsername.text = user.username
+                if(user.bitmap!=null) {
+                    iconAvatar.setImageBitmap(user.bitmap)
+                }
             }
 
         }
@@ -126,6 +128,14 @@ class UsersAdapter(
 
     private fun addUserToMeeting(user: User) {
         val meetingRef = database.collection("meetings").document(meetingID.toString())
-        meetingRef.update("users", FieldValue.arrayUnion(user))
+        val data = hashMapOf(
+            "uid" to user.uid,
+            "email" to user.email,
+            "latitude" to user.latitude,
+            "longitude" to user.longitude,
+            "token" to user.token,
+            "username" to user.username,
+            "imageUri" to user.uri)
+        meetingRef.update("users", FieldValue.arrayUnion(data))
     }
 }

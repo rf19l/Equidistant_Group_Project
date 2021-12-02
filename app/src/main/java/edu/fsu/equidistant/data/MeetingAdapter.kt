@@ -33,6 +33,7 @@ class MeetingAdapter(private var usersList: MutableList<User>) :
             binding.apply {
                 textViewEmailList.text = user.email
                 textViewUsername.text = user.username
+                iconAvatar.setImageBitmap(user.bitmap)
             }
 
         }
