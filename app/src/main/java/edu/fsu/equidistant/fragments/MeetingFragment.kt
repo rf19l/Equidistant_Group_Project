@@ -23,7 +23,9 @@ import edu.fsu.equidistant.databinding.FragmentMeetingBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
+import java.util.concurrent.CountDownLatch
 
 class MeetingFragment : Fragment(R.layout.fragment_meeting) {
 
@@ -89,34 +91,36 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                 if (document != null) {
                     if (document.exists()) {
                         val users = document.get("users")
-
+                        usersList.clear()
                         if (users != null) {
+                            CoroutineScope(Dispatchers.Main).launch {
                             val list: ArrayList<Map<String, Any>> =
                                 users as ArrayList<Map<String, Any>>
 
-                            usersList.clear()
-
-                            for (user in list) {
-                                //TODO GET USER PICTURE IN MEETING FRAGMENT
-                                val picture: Bitmap? = null
-                                val userInMeeting = User(
-                                    user["username"].toString(),
-                                    user["email"].toString(),
-                                    user["token"].toString(),
-                                    user["longitude"] as Double,
-                                    user["latitude"] as Double,
-                                )
-
-                                usersList.add(userInMeeting)
+                                for (user in list) {
+                                    var picture: Bitmap? = null
+                                    CoroutineScope(Dispatchers.IO).launch{
+                                        picture=fetchFirebasePicture(Uri.parse(user["imageUri"].toString()),user["uid"].toString())
+                                    }.join()
+                                    val userInMeeting = User(
+                                        user["username"].toString(),
+                                        user["email"].toString(),
+                                        user["token"].toString(),
+                                        user["longitude"] as Double,
+                                        user["latitude"] as Double,
+                                        "none",
+                                        picture
+                                    )
+                                    if(usersList.size<list.size) {
+                                        usersList.add(userInMeeting)
+                                    }
+                                }
+                                binding.meetingRecyclerView.adapter = meetingAdapter
                             }
-
-                        } else {
-                            Log.d(TAG, "users array is null")
                         }
+
                     }
                 }
-
-                binding.meetingRecyclerView.adapter = meetingAdapter
             }
     }
 
@@ -155,24 +159,53 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         return centerpoint
     }
 
-    private fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap?{
+    private suspend fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap? = withContext(Dispatchers.IO){
         var bmp: Bitmap? = null
-
-        if (imageUri == null || imageUri.toString().isEmpty()){
-            return bmp
+        val done = CountDownLatch(1)
+        if (imageUri == null || imageUri.toString().isEmpty()|| imageUri.toString() == "null"){
+            done.countDown()
+            return@withContext bmp
         }
         val imageRef = storageRef.child("users/"+ uid + "/" +imageUri)
         val ONE_MB : Long = 1024 * 1024
-
-        imageRef.getBytes(ONE_MB)
+        val task = imageRef.getBytes(ONE_MB)
             .addOnSuccessListener {
                 bmp = BitmapFactory.decodeByteArray(it,0,it.size)
+                Log.d("TAG","Fetched profile picture")
+
 
             }.
             addOnFailureListener{
+                Log.d("TAG","Failed to fetch profile picture")
             }
-        return bmp
+            .addOnCompleteListener{
+                done.countDown()
+            }
+        try{
+            done.await()
+        }catch(e:InterruptedException){
+            Log.d("TAG",e.message.toString())
+        }
+
+        bmp= bmp?.let { resizeBitmap(it,250) }
+        return@withContext bmp
+
+        //  return@withContext BitmapFactory.decodeByteArray(task.getResult(),0,task.getResult().size)
     }
+
+    private fun resizeBitmap(source:Bitmap,maxLength:Int):Bitmap{
+        try {
+            if(source.height != maxLength || source.width != maxLength){
+                val result = Bitmap.createScaledBitmap(source, maxLength,maxLength,false)
+                return result
+            }
+            return source
+        } catch (e: Exception) {
+            return source
+        }
+    }
+
+
 
 
 }

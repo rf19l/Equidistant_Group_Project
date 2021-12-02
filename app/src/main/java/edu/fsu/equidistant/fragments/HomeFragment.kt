@@ -8,7 +8,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
@@ -36,11 +38,11 @@ import edu.fsu.equidistant.data.User
 import edu.fsu.equidistant.data.UsersAdapter
 import edu.fsu.equidistant.databinding.FragmentHomeBinding
 import edu.fsu.equidistant.location.service.MyLocationService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
+import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
+
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -144,12 +146,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     Log.w(TAG, "Listen failed.", error)
                     return@addSnapshotListener
                 }
-
                 usersList.clear()
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(Dispatchers.Main).launch {
                     for (document in documents!!) {
+                        var picture:Bitmap? = null
                         val data = document.data
-                        val picture = fetchFirebasePicture(Uri.parse(data["imageUri"].toString()), document.id)
+                        CoroutineScope(Dispatchers.IO).launch{
+                            picture = fetchFirebasePicture(Uri.parse(data["imageUri"].toString()), document.id)}.join()
+
                         val user = User(
                             data["username"].toString(),
                             data["email"].toString(),
@@ -157,18 +161,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             data["longitude"] as Double,
                             data["latitude"] as Double,
                             document.id,
-                            picture
+                            picture,
+                            data["imageUri"].toString()
                         )
 
+                        //TODO REMOVE THIS COMMENT TO HIDE SELF
+                        usersList.add(user)
                         Log.d(TAG, "GetUsersList longitude: ${data["longitude"]}")
-                        if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
+                        /*if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
                             usersList.add(user)
-                        }
+                        }*
+
+                         */
+                    }
+
+                    try {
+                        binding.recyclerViewUserList.adapter = usersAdapter
+                    }
+                    catch (e:Error){
+                        Log.d("TAG", e.message.toString())
                     }
                 }
-
-                binding.recyclerViewUserList.adapter = usersAdapter
             }
+
     }
 
     private fun search(item: MenuItem) {
@@ -314,22 +329,50 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
     }
-    private fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap?{
+    private suspend fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap? = withContext(Dispatchers.IO){
         var bmp: Bitmap? = null
-
-        if (imageUri == null || imageUri.toString().isEmpty()){
-            return bmp
+        val done = CountDownLatch(1)
+        if (imageUri == null || imageUri.toString().isEmpty()|| imageUri.toString() == "null"){
+            return@withContext bmp
         }
         val imageRef = storageRef.child("users/"+ uid + "/" +imageUri)
         val ONE_MB : Long = 1024 * 1024
-
-        imageRef.getBytes(ONE_MB)
+        val handler = Handler(Looper.getMainLooper())
+        val task = imageRef.getBytes(ONE_MB)
             .addOnSuccessListener {
                 bmp = BitmapFactory.decodeByteArray(it,0,it.size)
+                Log.d("TAG","Fetched profile picture")
+
 
             }.
             addOnFailureListener{
+                Log.d("TAG","Failed to fetch profile picture")
             }
-        return bmp
+            .addOnCompleteListener{
+                done.countDown()
+            }
+        try{
+            done.await()
+        }catch(e:InterruptedException){
+            Log.d("TAG",e.message.toString())
+        }
+
+        bmp= bmp?.let { resizeBitmap(it,250) }
+        return@withContext bmp
+
+      //  return@withContext BitmapFactory.decodeByteArray(task.getResult(),0,task.getResult().size)
     }
+
+    private fun resizeBitmap(source:Bitmap,maxLength:Int):Bitmap{
+        try {
+            if(source.height != maxLength || source.width != maxLength){
+                val result = Bitmap.createScaledBitmap(source, maxLength,maxLength,false)
+                return result
+            }
+            return source
+        } catch (e: Exception) {
+            return source
+        }
+    }
+
 }
