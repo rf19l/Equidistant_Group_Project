@@ -1,7 +1,10 @@
 package edu.fsu.equidistant.fragments
 
 import android.content.ContentValues.TAG
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,6 +13,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.MeetingAdapter
 import edu.fsu.equidistant.data.SharedViewModel
@@ -26,6 +31,9 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var meetingAdapter: MeetingAdapter
     private lateinit var centerLocation: Location
+
+    private val storage = Firebase.storage
+    val storageRef = storage.reference
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -89,12 +97,14 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
                             usersList.clear()
 
                             for (user in list) {
+                                //TODO GET USER PICTURE IN MEETING FRAGMENT
+                                val picture: Bitmap? = null
                                 val userInMeeting = User(
                                     user["username"].toString(),
                                     user["email"].toString(),
                                     user["token"].toString(),
                                     user["longitude"] as Double,
-                                    user["latitude"] as Double
+                                    user["latitude"] as Double,
                                 )
 
                                 usersList.add(userInMeeting)
@@ -144,4 +154,25 @@ class MeetingFragment : Fragment(R.layout.fragment_meeting) {
         )
         return centerpoint
     }
+
+    private fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap?{
+        var bmp: Bitmap? = null
+
+        if (imageUri == null || imageUri.toString().isEmpty()){
+            return bmp
+        }
+        val imageRef = storageRef.child("users/"+ uid + "/" +imageUri)
+        val ONE_MB : Long = 1024 * 1024
+
+        imageRef.getBytes(ONE_MB)
+            .addOnSuccessListener {
+                bmp = BitmapFactory.decodeByteArray(it,0,it.size)
+
+            }.
+            addOnFailureListener{
+            }
+        return bmp
+    }
+
+
 }

@@ -18,7 +18,6 @@ import edu.fsu.equidistant.notifications.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 class UsersAdapter(
     private var usersList: MutableList<User>,
@@ -70,6 +69,9 @@ class UsersAdapter(
             binding.apply {
                 textViewEmailList.text = user.email
                 textViewUsername.text = user.username
+                if(user.bitmap!=null) {
+                    iconAvatar.setImageBitmap(user.bitmap)
+                }
             }
 
         }

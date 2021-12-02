@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.*
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
@@ -24,7 +26,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.BuildConfig
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.data.SharedViewModel
@@ -44,6 +48,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val viewModel: SharedViewModel by activityViewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
+
+    private val storage = Firebase.storage
+    val storageRef = storage.reference
 
     override fun onStart() {
         super.onStart()
@@ -139,21 +146,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
 
                 usersList.clear()
+                CoroutineScope(Dispatchers.IO).launch {
+                    for (document in documents!!) {
+                        val data = document.data
+                        val picture = fetchFirebasePicture(data["imageUri"] as Uri, document.id)
+                        val user = User(
+                            data["username"].toString(),
+                            data["email"].toString(),
+                            data["token"].toString(),
+                            data["longitude"] as Double,
+                            data["latitude"] as Double,
+                            document.id,
+                            picture
+                        )
 
-                for (document in documents!!) {
-                    val data = document.data
-                    val user = User(
-                        data["username"].toString(),
-                        data["email"].toString(),
-                        data["token"].toString(),
-                        data["longitude"] as Double,
-                        data["latitude"] as Double,
-                        document.id
-                    )
-
-                    Log.d(TAG, "GetUsersList longitude: ${data["longitude"]}")
-                    if(user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
-                        usersList.add(user)
+                        Log.d(TAG, "GetUsersList longitude: ${data["longitude"]}")
+                        if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
+                            usersList.add(user)
+                        }
                     }
                 }
 
@@ -304,5 +314,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
     }
+    private fun fetchFirebasePicture(imageUri: Uri, uid:String):Bitmap?{
+        var bmp: Bitmap? = null
 
+        if (imageUri == null || imageUri.toString().isEmpty()){
+            return bmp
+        }
+        val imageRef = storageRef.child("users/"+ uid + "/" +imageUri)
+        val ONE_MB : Long = 1024 * 1024
+
+        imageRef.getBytes(ONE_MB)
+            .addOnSuccessListener {
+                bmp = BitmapFactory.decodeByteArray(it,0,it.size)
+
+            }.
+            addOnFailureListener{
+            }
+        return bmp
+    }
 }
