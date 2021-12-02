@@ -101,9 +101,10 @@
         android:id="@+id/submit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_below="@+id/et_validate_container"
         android:layout_centerInParent="true"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/white"
         android:text="@string/submit" />
 
     <LinearLayout
