@@ -99,7 +99,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 true
             }
             R.id.option_editProfile -> {
-                val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment(args.userId)
+                val action = HomeFragmentDirections.actionHomeFragmentToProfileFragment()
                 findNavController().navigate(action)
                 true
             }

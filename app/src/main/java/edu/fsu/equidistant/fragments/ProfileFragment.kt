@@ -1,41 +1,53 @@
 package edu.fsu.equidistant.fragments
 
+import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.contract.ActivityResultContracts.GetContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.userProfileChangeRequest
-import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import edu.fsu.equidistant.R
+import edu.fsu.equidistant.data.Profile
 import edu.fsu.equidistant.databinding.FragmentProfileBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
-class ProfileFragment : Fragment(R.layout.fragment_home) {
 
 
+
+class ProfileFragment : Fragment(R.layout.fragment_profile) {
+
+    /* Firebase Variables */
     private val storage = Firebase.storage
     val storageRef = storage.reference
-    private val args: ProfileFragmentArgs by navArgs()
-    private var binding: FragmentProfileBinding? = null
     private var user: FirebaseUser? = null
-    private var imageUri: Uri? = null
     private val db = Firebase.firestore
 
+    /* Components */
+    private var binding: FragmentProfileBinding? = null
+    private var imageUri: Uri? = null
+    private lateinit var bitmap:Bitmap
+    private lateinit var username:String
 
-
+    /* Data */
+    private lateinit var profile: Profile
 
     override fun onCreateView(
 
@@ -47,112 +59,102 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
 
         binding = FragmentProfileBinding.inflate(inflater, container, false)
         val view = binding!!.root
+        CoroutineScope(Dispatchers.IO).launch {
+            getUserProfile(binding!!)
+        }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
-        user = FirebaseAuth.getInstance().currentUser
-    /*
-        Get image from gallery, sets it as the users profile photo
-        and uploads it to firebase storage
-     */
-        //TODO Clean up filepath and integrate with firestore to link account to photo
-        val loadImage=registerForActivityResult(
-            GetContent(),
-            ActivityResultCallback {
-                binding?.imageViewProfilePhoto?.setImageURI(it)
-                imageUri = it
-
-                val imageRef = storageRef.child("users/" + user?.email + "/" + imageUri)
-                val baos = ByteArrayOutputStream()
-
-                binding?.let { it1 -> getBitmapFromView(it1.imageViewProfilePhoto) }
-                    ?.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-
-                val data = baos.toByteArray()
-                val uploadTask = imageRef.putBytes(data)
-
-                uploadTask.addOnFailureListener {
-                    Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
-                }.addOnSuccessListener { taskSnapshot ->
-                    // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
-                    Toast.makeText(context,"Upload Success",Toast.LENGTH_LONG).show()
-                }
-
-                /*
-                    Update users profile url
-                 */
-                val profileUpdates = userProfileChangeRequest {
-                    if (imageUri!=null) {
-                        photoUri = imageUri
-                    }
-                }
-                //TODO Dont update profile if user canceled uploading a photo
-                user!!.updateProfile(profileUpdates)
-                    .addOnCompleteListener { task->
-                        if (task.isSuccessful){
-                            Toast.makeText(context,"Profile Update Successful",Toast.LENGTH_LONG).show()
-                            val data = hashMapOf(
-                                "name" to user?.email,
-                                "avatar" to storageRef.child(user?.photoUrl.toString()).path
-                            )
-
-                            user?.email?.let { it1 -> db.collection("users").document(it1).set(data, SetOptions.merge()) }
-                        }
-                        else{
-                            Toast.makeText(context,"Failed to update profile",Toast.LENGTH_LONG).show()
-                        }
-                    }
-            })
+    //    setHasOptionsMenu(true)
 
         /*
             Set views
          */
         binding!!.apply{
 
-            //TODO Set size of profile photo to some ratio of screen size
-            /*
-                Download users profile photo from cloud storage
-             */
-            if(user?.photoUrl != null){
-                var imageRef = storageRef.child("users/"+ user?.email + "/" +user?.photoUrl.toString())
-                val ONE_MB : Long = 1024 * 1024
-                imageRef.getBytes(ONE_MB).addOnSuccessListener {
-                    val bmp:Bitmap = BitmapFactory.decodeByteArray(it,0,it.size)
-                    //TODO Change to setImageBitmap(Bitmap.createScaledBitmap(...) when image view size is determined
-                    imageViewProfilePhoto.setImageBitmap(bmp)
-                }.addOnFailureListener{
-                    Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
-                }
-            }
-
-            /*
-                upload photo to firebase storage
-             */
-            imageViewProfilePhoto.setOnClickListener {
-                loadImage.launch("image/*")
-            }
-
+            /* Navigation Components */
             ibBackArrow.setOnClickListener {
                 val action = ProfileFragmentDirections.actionProfileFragmentToHomeFragment(
-                    user?.email!!,
-                    user!!.uid
+                    FirebaseAuth.getInstance().currentUser?.email!!,
+                    FirebaseAuth.getInstance().currentUser!!.uid
                 )
                 findNavController().navigate(action)
             }
             btUpdate.setOnClickListener {
+                if(imageUri.toString() != profile.photoRef) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        uploadPicture()
+                        updateFirestoreImage()
+                        deleteOldPicture()
+                    }
+                if(profile.username != username){
+                    CoroutineScope(Dispatchers.IO).launch{
+                        updateFirestoreUsername()
+                    }
+                }
+                }
                 val action = ProfileFragmentDirections.actionProfileFragmentToHomeFragment(
-                    user?.email!!,
-                    user!!.uid
+                    FirebaseAuth.getInstance().currentUser?.email!!,
+                    FirebaseAuth.getInstance().currentUser?.uid!!
                 )
                 findNavController().navigate(action)
+                }
+
+            imageViewProfilePhoto.setOnClickListener {
+                selectPhoto.launch("image/*")
             }
         }
+    }
 
+    private fun deleteOldPicture() {
+        val imageRef = storageRef.child("users/" + FirebaseAuth.getInstance().currentUser?.uid + "/" + Uri.parse(profile.photoRef))
+        imageRef.delete().addOnSuccessListener(OnSuccessListener<Void?> {
+            Log.d("TAG","Successfully deleted old picture from storage")
+            // File deleted successfully
+        }).addOnFailureListener(OnFailureListener {
+            Log.d("TAG","Error Deleting Old Picture from cloud storage")
 
+            // Uh-oh, an error occurred!
+        })
+    }
 
+    private fun getUserProfile(binding: FragmentProfileBinding){
+
+        FirebaseAuth.getInstance().currentUser!!.uid?.let {
+            db.collection("users").document(it)
+                .addSnapshotListener { document, error ->
+                    if (error != null) {
+                        Log.w(ContentValues.TAG, "Listen failed.", error)
+                        return@addSnapshotListener
+                    }
+                    val data = document!!.data!!
+                    var tempUri=""
+                    if(data["imageUri"] != null){
+                        tempUri = data["imageUri"].toString()
+                    }
+                    profile = Profile(
+                        it,
+                        data["username"].toString(),
+                        tempUri
+                    )
+                    binding.apply{
+                        etEditUsername.setText(data["username"].toString())
+                        username=data["username"].toString()
+                    }
+                    if(tempUri.isNotEmpty()){
+                        /*
+                        imageUri = Uri.parse(tempUri)
+                        bitmap = MediaStore.Images.Media.getBitmap(context?.getContentResolver(),imageUri )
+                        binding.imageViewProfilePhoto.setImageBitmap(resizeBitmap(bitmap,600))
+                         */
+                        imageUri = Uri.parse(tempUri)
+                        fetchFirebasePicture()
+                    }
+                    Log.d(ContentValues.TAG, "GetProfile for: ${data["username"]}")
+                }
+        }
     }
 
 
@@ -195,5 +197,88 @@ class ProfileFragment : Fragment(R.layout.fragment_home) {
         val canvas = Canvas(bitmap)
         view.draw(canvas)
         return bitmap
+    }
+
+    private val selectPhoto = registerForActivityResult(
+        ActivityResultContracts.GetContent(),
+        ActivityResultCallback {
+            if(it != null){
+            imageUri = it
+            val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context?.getContentResolver(), imageUri)
+                binding?.imageViewProfilePhoto?.setImageBitmap(resizeBitmap(bitmap,600))
+            }
+        })
+
+    private fun resizeBitmap(source:Bitmap,maxLength:Int):Bitmap{
+        try {
+            if(source.height != maxLength || source.width != maxLength){
+                val result = Bitmap.createScaledBitmap(source, maxLength,maxLength,false)
+                bitmap = result
+                return result
+            }
+            return source
+        } catch (e: Exception) {
+            bitmap = source
+            return source
+        }
+    }
+
+    private fun uploadPicture(){
+        val imageRef = storageRef.child("users/" + FirebaseAuth.getInstance().currentUser?.uid + "/" + imageUri)
+        val baos = ByteArrayOutputStream()
+
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+
+        val data = baos.toByteArray()
+        val uploadTask = imageRef.putBytes(data)
+
+        uploadTask.addOnFailureListener {
+            Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
+        }.addOnSuccessListener { taskSnapshot ->
+            Log.d("TAG","Upload Success!")
+            // taskSnapshot.metadata contains file metadata such as size, content-type, etc.
+            Toast.makeText(context,"Upload Success",Toast.LENGTH_LONG).show()
+        }
+
+    }
+
+    private fun fetchFirebasePicture(){
+        if (profile.photoRef == null || profile.photoRef.isEmpty()){
+            return
+        }
+        val imageRef = storageRef.child("users/"+ FirebaseAuth.getInstance().currentUser?.uid + "/" +profile.photoRef)
+        val ONE_MB : Long = 1024 * 1024
+
+        imageRef.getBytes(ONE_MB)
+            .addOnSuccessListener {
+                val bmp:Bitmap = BitmapFactory.decodeByteArray(it,0,it.size)
+                binding?.imageViewProfilePhoto?.setImageBitmap(resizeBitmap(bmp,600))
+
+        }.
+            addOnFailureListener{
+                val ref = db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid)
+                ref
+                    .update("imageUri", "")
+                    .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+                    .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
+                Toast.makeText(context,it.message,Toast.LENGTH_LONG).show()
+            }
+        }
+
+    private fun updateFirestoreImage(){
+        val ref = db.collection("users").document(FirebaseAuth.getInstance().currentUser!!.uid)
+
+// Set the "isCapital" field of the city 'DC'
+        ref
+            .update("imageUri", imageUri.toString())
+            .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+            .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
+    }
+    private fun updateFirestoreUsername(){
+        val userRef = db.collection("user").document(profile.uuid)
+        userRef
+            .update("username",username)
+            .addOnSuccessListener { Log.d("TAG", "DocumentSnapshot successfully updated!") }
+            .addOnFailureListener { e -> Log.w("TAG", "Error updating document", e) }
     }
 }

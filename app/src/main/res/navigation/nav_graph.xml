@@ -61,9 +61,6 @@
         android:name="edu.fsu.equidistant.fragments.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" >
-        <argument
-            android:name="userId" >
-        </argument>
         <action
             android:id="@+id/action_profileFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
