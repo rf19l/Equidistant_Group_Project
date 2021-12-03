@@ -27,6 +27,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -50,6 +51,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val viewModel: SharedViewModel by activityViewModels()
     private val database: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var usersAdapter: UsersAdapter
+    private  var self:User? = null
 
     private val storage = Firebase.storage
     val storageRef = storage.reference
@@ -87,6 +89,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         CoroutineScope(Dispatchers.IO).launch {
             getUsersList(usersAdapter, binding, usersList)
+        }
+        CoroutineScope(Dispatchers.IO).launch {
         }
 
         if (foregroundPermissionApproved()) {
@@ -171,6 +175,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         if (user.uid != FirebaseAuth.getInstance().currentUser?.uid) {
                             usersList.add(user)
                         }
+                        else{
+                            CoroutineScope(Dispatchers.IO).launch {
+                                self = user
+                                addSelfToMeeting()
+                            }
+                        }
 
                     }
 
@@ -212,7 +222,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         .document(viewModel.meetingID.toString())
                         .set({})
                 }
-
             }
             .addOnFailureListener { exception ->
                 Log.d(TAG, "get failed with ", exception)
@@ -374,4 +383,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-}
+    private fun addSelfToMeeting(){
+            val meetingRef = database.collection("meetings").document(viewModel.meetingID.toString())
+        if (self!=null) {
+            val data = hashMapOf(
+                "uid" to self!!.uid,
+                "email" to self!!.email,
+                "latitude" to self!!.latitude,
+                "longitude" to self!!.longitude,
+                "token" to self!!.token,
+                "username" to self!!.username,
+                "imageUri" to self!!.uri
+            )
+            meetingRef.update("users", FieldValue.arrayUnion(data))
+        }
+        }
+    }

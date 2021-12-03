@@ -13,6 +13,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import edu.fsu.equidistant.R
 import edu.fsu.equidistant.databinding.FragmentRegisterBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment(R.layout.fragment_register) {
 
@@ -29,9 +32,10 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
                 val password = etPassword.text.toString().trim { it <= ' ' }
                 val confirmPassword = etValidate.text.toString().trim { it <= ' ' }
                 val email = etEmail.text.toString().trim { it <= ' ' }
-
                 if (validate(username, password, confirmPassword, email)) {
-                    registerUser(email, password, username)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        registerUser(email, password, username)
+                    }
                 }
 
             }
@@ -95,7 +99,8 @@ class RegisterFragment : Fragment(R.layout.fragment_register) {
             "username" to username,
             "token" to null,
             "longitude" to 0.0,
-            "latitude" to 0.0
+            "latitude" to 0.0,
+            "imageUri" to ""
         )
 
         database.collection("users").document(uid).set(data)

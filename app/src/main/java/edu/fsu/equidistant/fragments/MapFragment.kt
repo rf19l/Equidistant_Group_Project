@@ -70,7 +70,7 @@ class MapFragment : Fragment(R.layout.fragment_map), OnMapReadyCallback {
     private fun getNearbyPlace() {
         val url = ("https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
                 + centerLocation.latitude + "," + centerLocation.longitude
-                + "&radius=7500&type=restaurant&key=MY_KEY")
+                + "&radius=7500&type=restaurant&key=AIzaSyBwV4KuK_aRz8aW1Rh2gOnKJzgNoKfXcas")
 
         lifecycleScope.launchWhenStarted {
             locationViewModel.getNearbyPlace(url).collect {
